@@ -1,0 +1,286 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+import tempfile
+from collections import defaultdict
+from collections import OrderedDict
+import logging
+
+
+# DSK dependency
+from context_manager import Context
+from config_manager import ConfigManager
+
+# Local dependency
+from dsk.base.utils.time_utils import StopWatch
+from dsk.base.utils import disk_utils
+from dsk.base.utils import shotgun_utils
+
+# description support
+
+from usd_pipe.api import usdscene_api
+from usd_pipe.api import gatekeeper_api
+
+# helper for parser
+from usd_pipe.gatekeeper.usd import usdfile_utils
+from usd_pipe.usd.usd_shot_scene import UsdShotScene
+
+
+# extension for generated scenegraph
+bmsc_ext = ConfigManager().config("outsource", filename="dskscene")["dskscene_ext"]
+assert bmsc_ext == "bmsc"
+class config_data(object):
+    config = None
+
+    @classmethod
+    def get_config_data(cls):
+        cls.config = ConfigManager().config("outsource", filename="usd_bootstrap")
+        return cls.config
+
+    @classmethod
+    def init(cls, label):
+        cdata = cls.config if cls.config is not None else cls.get_config_data()
+        for job in cdata["jobs"]:
+            if label == job["label"]:
+                cls.outputdir = job["location"]
+                cls.context = job["context"]
+                cls.via = job["via"]
+                cls.material = job["material"]
+                return
+        raise Exception("No label {} found".format(label))
+
+
+def get_parser():
+    parser = argparse.ArgumentParser()
+    # required = parser.add_argument_group("required named arguments")
+
+    parser.add_argument(
+        "--label",
+        "-l",
+        default="default",
+        help="label are defined in the config outsource.  help with consistency ",
+        dest="label",
+    )
+    parser.add_argument(
+        "--context",
+        "-c",
+        default="default",
+        help="Context short path to open a shot/task: " "(context bm as bms)",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        default="default",
+        help="Output folder location",
+        dest="output",
+    )
+    parser.add_argument(
+        "--force",
+        "-f",
+        help="to force update(only on the shot in context)"
+        "for extra shot force is apply to the bmsc scene only",
+        action="store_true",
+        dest="force",
+    )
+    # add an optionnal shot list
+    parser.add_argument(
+        "--shot",
+        "-s",
+        nargs="*",
+        help="Shot list or list of playlist id of extra shot than the one in context",
+        default=[],
+        dest="list_of_shot",
+    )
+    parser.add_argument(
+        "--user",
+        "-u",
+        help="but default, it's user free(share location), -u will look.. not done",
+        action="store_true",
+        dest="user",
+    )
+    parser.add_argument("--via", choices=usdfile_utils.UsdFileUtils.via_list)
+    parser.add_argument("--material", choices=usdfile_utils.UsdFileUtils.scene_type_mat)
+    parser.add_argument(
+        "--on",
+        choices=[
+            "set",
+            "anim",
+            "crowd",
+            "setanim",
+            "setcrowd",
+            "animcrowd",
+            "all",
+            "none",
+        ],
+        default="set",
+    )
+    parser.add_argument(
+        "--scatter", choices=["asset", "fx", "both", "no"], default="no"
+    )
+    return parser
+
+
+def main(arguments=None):
+
+    SW = StopWatch()
+
+    parser = get_parser()
+    args = parser.parse_args(arguments)
+
+    config_data.init(args.label)
+    if args.context == "default":
+        args.context = config_data.context
+    if args.output == "default":
+        args.output = config_data.outputdir
+    if args.via == None:
+        args.via = config_data.via
+    if args.material == None:
+        args.material = config_data.material
+
+    # log
+    prgname = "usd_bootstrap"
+    log = logging.getLogger(prgname)
+
+    # context
+    ctx = (
+        Context.from_short_path(args.context, validate=True)
+        if args.context is not None
+        else Context.from_environment(validate=True)
+    )
+    if ctx.shot == None:
+        log.error("need a shot in the context")
+        sys.exit(1)
+
+    default_task = "lighting"
+    task = ctx.task
+    if task is None:
+        ctx = Context.from_short_path(
+            args.context + "/%s" % default_task, validate=True
+        )
+    else:
+        default_task = ctx.task
+    assert default_task != ""
+
+    # for some issue with asset_api
+    shot_env = {
+        "DSK_PROJECT": ctx.project,
+        "DSK_SEQUENCE": ctx.sequence or "",
+        "DSK_SHOT": ctx.shot or "",
+        "DSK_TASK": ctx.task or "",
+    }
+    os.environ.update(shot_env)
+
+    # dump location
+    # create a tmp dir if not defined
+    outputdir = args.output
+    if outputdir == "tmp":
+        outputdir = tempfile.mkdtemp()
+    else:
+        if not disk_utils.DiskUtils(log).create_path_recursive(outputdir):
+            log.error("Trouble creating {}".format(outputdir))
+            sys.exit(1)
+
+    input_files_lookup = defaultdict(list)
+
+    """
+    It's not completely define in this dataflow, but we needs to treate asset shared
+    area differently than shot:
+     Trying to identify in this simple example, the needs to
+    update asset (model, later surfacing etc...) throught the force flag, that only
+    be efficient if the all the asset in that launch can be exported only once and
+    not every for every shot independently.
+    result of the search what's needs to be udpdated
+    """
+
+    helper = gatekeeper_api.GatekeeperApi(ctx, outputdir, log)
+    input_file_lookup = helper.get_bmsc_file(args.via, args.material, args.force)
+
+    shot_list, _ = shotgun_utils.ShotgunUtils.get_shot_list(ctx, args.list_of_shot)
+    shot_list.sort()
+    extra_shots = OrderedDict()
+    for shot in shot_list:
+        if shot != ctx.shot:
+            seq = shot.split("_")[0]
+            extra_ctx = Context.from_short_path(
+                "/%s/%s/%s/%s" % (ctx.project, seq, shot, ctx.task)
+            )
+            # other Shot
+            extra_gate = gatekeeper_api.GatekeeperApi(extra_ctx, outputdir, log)
+            extra_shots[extra_gate] = extra_gate.get_bmsc_file(
+                args.via, args.material, args.force
+            )
+
+    do_region = True if args.on in ["all", "set", "setanim", "setcrowd"] else False
+    do_anim = True if args.on in ["all", "anim", "setanim", "animcrowd"] else False
+    do_crowd = True if args.on in ["all", "crowd", "setcrowd", "animcrowd"] else False
+
+    do_shot_scatter = True if args.scatter in ["fx", "both"] else False
+    do_asset_scatter = True if args.scatter in ["asset", "both"] else False
+    do_all = True if args.on in ["all"] else False
+
+    sapi = usdscene_api.UsdSceneApi(ctx, outputdir, log)
+    all_scene = [sapi]
+    if args.force and len(extra_shots) > 0:
+        # Asset level are done in at once so we can avoid having to rebuild
+        all_scene = sapi.export_assets_common(
+            args.via, extra_shots, do_anim=do_anim, do_crowd=do_crowd, force=args.force
+        )
+    else:
+        scene_desc = sapi.get_scene(args.via)
+        for gk in extra_shots:
+            usdapi = usdscene_api.UsdSceneApi(gk.ctx, sapi.get_outdir(), log)
+            extra = usdapi.get_scene(args.via)
+            assert extra is not None
+            all_scene.append(usdapi)
+
+    # warning on in the case of xml, so far the key can be a list
+    # print input_file_lookup
+    force = args.force
+    for index, scene in enumerate(all_scene):
+        scene_desc = scene.description
+        if scene_desc is None:
+            log.error("No scene found for {}".format(scene.ctx))
+            continue
+        log.info(
+            "Geom Found in: {}: {}".format(scene.ctx, scene_desc.get_register().keys())
+        )
+
+        scene_naming = sapi.export_shot_simple(
+            asset_done=args.force and len(extra_shots) > 0,
+            do_region=do_region,
+            do_asset_scatter=do_asset_scatter,
+            do_anim=do_anim,
+            do_crowd=do_crowd,
+            do_shot_scatter=do_shot_scatter,
+            do_all=do_all,
+            force=force,
+        )
+        # as SEQUENCE/SHOT
+        SW1 = StopWatch()
+
+        log.info("from: {}:".format(scene.get_scene_name(args.via)))
+        shot_scene = UsdShotScene(scene.ctx, scene.get_outdir(), log)
+        shot_scene.build_usd_shot(
+            scene_naming, taskname="%s_%s" % (args.on, args.via), force=force,
+        )
+
+        SW1.stop()
+        log.info(
+            "Duration shot build({}): {:.4f} seconds".format(scene.ctx, SW1.elapsed())
+        )
+        SW1 = StopWatch()
+
+        if index == 0:
+            # not force on extra shot
+            force = False
+
+    SW.stop()
+    log.info("Duration: {:.2f} minutes".format(SW.elapsed() / 60.0))
+
+
+# ext install AnimalLogic.vscode-usda-syntax
+
+if __name__ == "__main__":
+    main()
