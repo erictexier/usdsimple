@@ -4,7 +4,7 @@ import collections
 import logging
 
 # Local
-from usd_pipe.io.xml_io import XmlIO
+from metaio.xml_io import XmlIO
 class GenericXml(object):
     __slots__ = ["__children", "__parent", "__verbose", "__xmltag"]
     Property = "GenericXml"

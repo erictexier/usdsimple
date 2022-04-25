@@ -6,7 +6,7 @@ import json
 import base64
 
 # Local
-from usd_pipe.io.genericxml import GenericXml
+from metaio.genericxml import GenericXml
 
 # SCHEMA
 
@@ -61,9 +61,9 @@ class constant(object):
     isfile = "file"
 
 
-class constant_bams(object):
-    bams_uri = "bundles_uri://"
-    bams_bams = "bams://"
+class constant_uri(object):
+    uri_uri = "bundles_uri://"
+    uri_uri = "uri://"
 
 
 class SceneXml(GenericXml):
@@ -165,10 +165,10 @@ class SceneXml(GenericXml):
 
 
 class ScenegraphXml(SceneXml):
-    """Top level node for a bams queriable scenegraph (optional)"""
+    """Top level node for a uri queriable scenegraph (optional)"""
 
     Property = "root"
-    __ServiceBams = None
+    __Serviceuri = None
     SUBREGION = "SUB_"
 
     def __init__(self, tag=constant.scenetag):
@@ -224,50 +224,50 @@ class ScenegraphXml(SceneXml):
         return self.__registered
 
     @classmethod
-    def set_bams(cls, scene_bams):
+    def set_uri(cls, scene_uri):
         """set to None to release
         Args:
-            scene_bams(outsource.gatekeeper.io.scenebams.SceneBams): instance
+            scene_uri: instance
         """
-        if scene_bams is None:
-            cls.__ServiceBams = None
+        if scene_uri is None:
+            cls.__Serviceuri = None
         else:
-            from usd_pipe.io import scenebams
+            from metaio import sceneuri
 
-            assert isinstance(scene_bams, scenebams.SceneBams)
-            cls.__ServiceBams = scene_bams
+            assert isinstance(scene_uri, sceneuri.Sceneuri)
+            cls.__Serviceuri = scene_uri
 
     @classmethod
-    def get_bams_service(cls):
-        return cls.__ServiceBams
-
-    @staticmethod
-    def is_bams(ref):
-        return ref.startswith(constant_bams.bams_bams)
+    def get_uri_service(cls):
+        return cls.__Serviceuri
 
     @staticmethod
     def is_uri(ref):
-        return ref.startswith(constant_bams.bams_uri)
+        return ref.startswith(constant_uri.uri_uri)
+
+    @staticmethod
+    def is_uri(ref):
+        return ref.startswith(constant_uri.uri_uri)
 
     @classmethod
-    def get_bams_data(cls, list_of_ref):
+    def get_uri_data(cls, list_of_ref):
         """Return a  model or klf
         Returns:
-            dict(): empty if no bams or uri ref
+            dict(): empty if no uri or uri ref
         """
         result = defaultdict(list)
-        if cls.__ServiceBams is None:
+        if cls.__Serviceuri is None:
             return dict()
         for ref in list_of_ref:
-            if cls.is_bams(ref):
-                res = cls.__ServiceBams.query_bams(ref)
+            if cls.is_uri(ref):
+                res = cls.__Serviceuri.query_uri(ref)
                 for key in res:
                     if key == "model":
                         result[constant.modelfile].append(res[key])
                     elif key == "material":
                         result[constant.lookfile].append(res[key])
             elif cls.is_uri(ref):
-                res = cls.__ServiceBams.query_bundle(ref)
+                res = cls.__Serviceuri.query_bundle(ref)
                 for key in res:
                     if key == "model":
                         result[constant.modelfile].extend(res[key])
@@ -278,9 +278,9 @@ class ScenegraphXml(SceneXml):
     @classmethod
     def get_sub_model_info(cls, scatterfile):
         result = dict()
-        if cls.__ServiceBams is None or scatterfile in [None, ""]:
+        if cls.__Serviceuri is None or scatterfile in [None, ""]:
             return dict()
-        result = cls.__ServiceBams.gather_scatter(scatterfile)
+        result = cls.__Serviceuri.gather_scatter(scatterfile)
         return result
 
 
@@ -431,7 +431,7 @@ class InstanceKlfXml(SceneXml):
         if parent is None:
             return self.ref
         root = parent.get_root()
-        result_query = root.get_bams_data([self.ref])
+        result_query = root.get_uri_data([self.ref])
         if result_query:
             if constant.lookfile in result_query:
                 return result_query[constant.lookfile][0]
@@ -534,7 +534,7 @@ class InstanceSceneXml(SceneXml):
             return self.refFile
         if self.refFile.endswith(".abc"):
             return self.refFile
-        result_query = self.__root.get_bams_data([self.refFile])
+        result_query = self.__root.get_uri_data([self.refFile])
         if result_query:
             # will just set the cache not the instance member
             if constant.lookfile in result_query:
@@ -561,10 +561,10 @@ class InstanceSceneXml(SceneXml):
         if value:
             self.__lookup[constant.lookfile] = value
             return value.get_data()
-        # check for bamsbundle
+        # check for uribundle
         if self.__root is None:
             return ""
-        result_query = self.__root.get_bams_data([self.refFile])
+        result_query = self.__root.get_uri_data([self.refFile])
         if result_query:
             # will just set the cache not the instance member
             if constant.lookfile in result_query:
@@ -722,7 +722,7 @@ class InstanceSceneXml(SceneXml):
 
 
 class InstanceAnimSceneXml(InstanceSceneXml):
-    # No bams support
+    # No uri support
     Property = "GEOM_ANIM_3D"
 
     def __init__(self, tag=constant.instanceanim):
@@ -736,7 +736,7 @@ class InstanceAnimSceneXml(InstanceSceneXml):
 
 
 class InstanceCrowdsSceneXml(InstanceSceneXml):
-    # No bams support
+    # No uri support
     Property = "GEOM_CROWD"
 
     def __init__(self, tag=constant.instancecrowds):
@@ -796,7 +796,7 @@ class InstanceScatterSceneXml(InstanceSceneXml):
         return filter(lambda x: x.Property == "SASSET", self.get_children())
 
     def set_primary_dependency(self):
-        """add a node per subasset with query bams"""
+        """add a node per subasset with query uri"""
         # assets = self.primasset.split(";")
         result = list()
         rootservice = self.get_root()
@@ -849,7 +849,7 @@ class InstanceScatterSceneXml(InstanceSceneXml):
 
 
 class InstanceCameraSceneXml(SceneXml):
-    # No bams support
+    # No uri support
     Property = "CAMERA"
 
     def __init__(self, tag=constant.instancecamera):
