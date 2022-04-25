@@ -1,0 +1,28 @@
+#usda 1.0
+(
+    defaultPrim = "paul"
+    subLayers = [
+        @./temp/sublayer_1.usda@,
+        @./temp/sublayer_2.usda@
+    ]
+    upAxis = "Y"
+)
+
+def Xform "paul" (
+    assetInfo = {
+        asset identifier = @.temp/paul.usda@
+        string name = "paul"
+    }
+    kind = "component"
+    prepend payload = [
+        @./temp/payload_1.usda@,
+        @./temp/payload_2.usda@
+    ]
+    prepend references = [
+        @./temp/ref_1.usda@,
+        @./temp/ref_2.usda@
+    ]
+)
+{
+}
+
