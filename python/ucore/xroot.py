@@ -42,33 +42,43 @@ class Modelvariant(namedtuple('modelvariant', 'name step model_variant_name')):
 # definition class hierachy
 # base
 class Xroot(object):
+    VALID_LAYER_TYPE = set()
     def __init__(self, atype):
         self._type = "%s%s" % (SCH_DEF.SDAT, atype)
 
-class XrootEntry(Xroot):
-    def __init__(self, name, atype, list_of_downstream):
-        super(XrootEntry, self).__init__(atype)
-
-        # TODO: valid name here
+class XLayerType(Xroot):
+    def __init__(self, name, layertype):
+        super(XLayerType, self).__init__(layertype)
         self.name = name
         self.downstream = list()
-        for x in list_of_downstream:
-            if isinstance(x, XLayerType):
-                self.downstream.append(x)
+        self.parent = None
 
-    def get_downstream(self):
+    def add_downstream(self, child):
+        self.downstream.append(child)
+        if isinstance(child, XLayerType):
+            self.downstream.append(child)
+            child.parent = self
+
+    def add_downstreams(self, children):
+        self.downstream.append(child)
+        for child in children:
+            if isinstance(child, XLayerType):
+                self.downstream.append(child)
+                child.parent = self
+
+class XrootEntry(XLayerType):
+    def __init__(self, name, atype):
+        super(XrootEntry, self).__init__(name, atype)
+
+    def get_sublayers(self):
         return self.downstream
 
     def __repr__(self):
-        return "type %s, name %s, downstream %s" % (self._type, self.name, self.downstream)
+        return "type %s, name %s, downstream %s" % (self._type, self.name, [x.name for x in self.downstream])
 
-class XLayerType(XrootEntry):
-    VALID_LAYER_TYPE = []
-    def __init__(self, name, layertype):
-        super(XLayerType, self).__init__(name, layertype, list())
 
 # opinions
-class XassetOpinion(XrootEntry):
+class XassetOpinion(XLayerType):
     def __init__(self, name, step, model_variant_name):
         self.step = step
         self.model_variant_name = model_variant_name
@@ -76,16 +86,15 @@ class XassetOpinion(XrootEntry):
         self.geom = XLayerType(SCH_DEF.opinion_geom.name, SCH_DEF.opinion_geom.type)
         super(XassetOpinion, self).__init__(name, SCH_DEF.layer_type_opinion.type, [self.description, self.geom])
 
-class XshotOpinion(XrootEntry):
+class XshotOpinion(XLayerType):
     def __init__(self, name, step):
         self.step = step
         self.description = XLayerType(SCH_DEF.opinion_desc.name, SCH_DEF.opinion_desc.type)
         self.geom = XLayerType(SCH_DEF.asset_opinion_geom.name, SCH_DEF.asset_opinion_geom.type)
-
         super(XshotOpinion, self).__init__(name, SCH_DEF.layer_type_opinion.type, [self.description, self.geom])
 
 # basic type
-class XassetElement(XrootEntry):
+class XassetElement(XLayerType):
     SHOW_OPINIONS = []
     def __init__(self, name):
         list_of_downstream = []
@@ -95,7 +104,7 @@ class XassetElement(XrootEntry):
             )
         super(XassetElement, self).__init__(name, SCH_DEF.basic_type_elm.type, list_of_downstream)
 
-class XassetChar(XrootEntry):
+class XassetChar(XLayerType):
     SHOW_OPINIONS = []
     def __init__(self, name):
         list_of_downstream = []
