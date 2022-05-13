@@ -6,35 +6,31 @@ class ConstantInfo(namedtuple('ConstantInfo', 'name type doc')):
 
 
 # schema
-class RootDefault(object):
+class RootDefinition(object):
     SDAT = 'sda'
-
-    # the name here is what can be found at config level
-    payload_desc = ConstantInfo("payload_str", "payload", "what we use as payload key")
-    reference_desc = ConstantInfo("reference_str", "reference", "what we use as reference key")
-    sublayer_desc = ConstantInfo("sublayer_str", "sublayer", "what we use as sublayer key")
+    SEP = '::'
 
     # basic type
-    basic_type_char = ConstantInfo("usd_char", "character", "what we use as sublayer key")
-    basic_type_elm = ConstantInfo("usd_elem", "element", "what we use as sublayer key")
-    basic_type_shot = ConstantInfo("usd_shot", "shot", "Not Done")
-    basic_type_seq = ConstantInfo("usd_seq", "sequence", "Not Done")
+    basic_type_asset = ConstantInfo('%s%sasset' % (SDAT, SEP), 'asset', 'can be instanced from a shot')
+    basic_type_shot = ConstantInfo('%s%sshot' % (SDAT, SEP), 'shot', 'collection of asset instance')
+    basic_type_seq = ConstantInfo('%s%sseq' % (SDAT, SEP), 'sequence', 'collection of shot')
 
-    basic_types = [basic_type_char, basic_type_elm, basic_type_shot, basic_type_seq]
+    basic_types = [basic_type_asset, basic_type_shot, basic_type_seq]
 
-    # layer type
-    # opinion
-    opinion_desc = ConstantInfo('sdal_opinion_geom', 'description', 'the model variant identificator')
-    opinion_geom = ConstantInfo('sdal_opinion_desc', 'geometry', 'the geom identificator')
-    layer_type_opinion = ConstantInfo('sdal_opinion_type', 'opinion', 'the type option')
+    # usd layer type
+    layer_type_payload = ConstantInfo('%s%spayload' % (SDAT, SEP), 'payload', 'refer a payload type layer')
+    layer_type_reference = ConstantInfo('%s%sreference' % (SDAT, SEP), 'reference', 'refer a reference type layer')
+    layer_type_sublayer = ConstantInfo('%s%ssublayer' % (SDAT, SEP), 'sublayer', 'refer a sublayer type layer')
 
-    layer_type_payload = ConstantInfo("sdal_payload", "payload", "refer a payload type layer")
-    layer_type_reference = ConstantInfo("sdal_reference", "reference", "refer a reference type layer")
-    layer_type_sublayer = ConstantInfo("sdal_sublayer", "sublayer", "refer a sublayer type layer")
+    # opinion for model
+    layer_type_opinion = ConstantInfo('%s%sopinion_type' % (SDAT, SEP), 'opinion', 'the type option')
+    opinion_desc = ConstantInfo('%s%sopinion_geom' % (SDAT, SEP), 'description', 'model variant identificator')
+    opinion_geom = ConstantInfo('%s%sopinion_desc' % (SDAT, SEP), 'geometry', 'the geom identificator')
+
 
     layer_types = [layer_type_payload, layer_type_reference, layer_type_sublayer, layer_type_opinion]
 
-SCH_DEF =  RootDefault
+SCH_DEF =  RootDefinition
 
 class Modelvariant(namedtuple('modelvariant', 'name step model_variant_name')):
     __slots__ = ()
@@ -44,7 +40,7 @@ class Modelvariant(namedtuple('modelvariant', 'name step model_variant_name')):
 class Xroot(object):
     VALID_LAYER_TYPE = set()
     def __init__(self, atype):
-        self._type = "%s%s" % (SCH_DEF.SDAT, atype)
+        self._type = '%s%s' % (SCH_DEF.SDAT, atype)
 
 class XLayerType(Xroot):
     def __init__(self, name, layertype):
@@ -60,7 +56,6 @@ class XLayerType(Xroot):
             child.parent = self
 
     def add_downstreams(self, children):
-        self.downstream.append(child)
         for child in children:
             if isinstance(child, XLayerType):
                 self.downstream.append(child)
@@ -74,7 +69,7 @@ class XrootEntry(XLayerType):
         return self.downstream
 
     def __repr__(self):
-        return "type %s, name %s, downstream %s" % (self._type, self.name, [x.name for x in self.downstream])
+        return 'type %s, name %s, downstream %s' % (self._type, self.name, [x.name for x in self.downstream])
 
 
 # opinions
@@ -84,14 +79,17 @@ class XassetOpinion(XLayerType):
         self.model_variant_name = model_variant_name
         self.description = XLayerType(SCH_DEF.opinion_desc.name, SCH_DEF.opinion_desc.type)
         self.geom = XLayerType(SCH_DEF.opinion_geom.name, SCH_DEF.opinion_geom.type)
-        super(XassetOpinion, self).__init__(name, SCH_DEF.layer_type_opinion.type, [self.description, self.geom])
+        super(XassetOpinion, self).__init__(name, SCH_DEF.layer_type_opinion.type)
+        self.add_downstreams([self.description, self.geom])
 
-class XshotOpinion(XLayerType):
+
+class XShotLayers(XLayerType):
     def __init__(self, name, step):
         self.step = step
         self.description = XLayerType(SCH_DEF.opinion_desc.name, SCH_DEF.opinion_desc.type)
-        self.geom = XLayerType(SCH_DEF.asset_opinion_geom.name, SCH_DEF.asset_opinion_geom.type)
-        super(XshotOpinion, self).__init__(name, SCH_DEF.layer_type_opinion.type, [self.description, self.geom])
+        self.geom = XLayerType(SCH_DEF.opinion_geom.name, SCH_DEF.opinion_geom.type)
+        super(XShotLayers, self).__init__(name, SCH_DEF.layer_type_opinion.type)
+        
 
 # basic type
 class XassetElement(XLayerType):
@@ -109,7 +107,7 @@ class XassetChar(XLayerType):
     def __init__(self, name):
         list_of_downstream = []
         for x in self.SHOW_OPINIONS:
-            print("x"*30, x)
+            print('x'*30, x)
             list_of_downstream.append(
                 XassetOpinion(x.name, x.step, x.model_variant_name)
             )
@@ -122,18 +120,18 @@ class Xshot(XrootEntry):
         list_of_downstream = []
         for x in self.SHOW_OPINIONS:
             list_of_downstream.append(
-                XshotOpinion(x.name, x.step)
+                XShotLayers(x.name, x.step)
             )
         super(Xshot, self).__init__(name, SCH_DEF.basic_type_shot.type, list_of_downstream)
 
 
 class Xscene(object):
-    Property = "Xscene"
-    PrefixNaming = "X"
+    Property = 'Xscene'
+    PrefixNaming = 'X'
     __filter = set()
     def __init__(self, tag=None):
         super(Xscene, self).__init__()
-        print("init xscene root %s" % tag)
+        print('init xscene root %s' % tag)
         self.tag = tag
 
     @classmethod
@@ -191,6 +189,7 @@ if __name__ == '__main__':
     # print(XassetElement(assetname))
     # shotname = "xseq_001"
     # print(Xshot(shotname))
+
 
     result = Xscene.context_factory(
                             ["Xopinion"],
