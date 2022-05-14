@@ -10,13 +10,6 @@ class RootDefinition(object):
     SDAT = 'sda'
     SEP = '::'
 
-    # basic new type
-    basic_type_asset = ConstantInfo('%s%sasset' % (SDAT, SEP), 'asset', 'can be instanced from a shot')
-    basic_type_shot = ConstantInfo('%s%sshot' % (SDAT, SEP), 'shot', 'collection of asset instance')
-    basic_type_seq = ConstantInfo('%s%sseq' % (SDAT, SEP), 'sequence', 'collection of shot')
-
-    basic_types = [basic_type_asset, basic_type_shot, basic_type_seq]
-
     # usd layer type
     layer_type_payload = ConstantInfo('%s%spayload' % (SDAT, SEP), 'payload', 'refer a payload type layer')
     layer_type_reference = ConstantInfo('%s%sreference' % (SDAT, SEP), 'reference', 'refer a reference type layer')
@@ -24,6 +17,15 @@ class RootDefinition(object):
     layer_type_empty = ConstantInfo('%s%sempty' % (SDAT, SEP), 'empty', 'refer to an empty layer')
 
     usd_layer_types = [layer_type_payload, layer_type_reference, layer_type_sublayer, layer_type_empty]
+
+
+    # basic new type
+    basic_type_asset = ConstantInfo('%s%sasset' % (SDAT, SEP), 'asset', 'can be instanced from a shot')
+    basic_type_shot = ConstantInfo('%s%sshot' % (SDAT, SEP), 'shot', 'collection of asset instance')
+    basic_type_seq = ConstantInfo('%s%sseq' % (SDAT, SEP), 'sequence', 'collection of shot')
+
+    basic_types = [basic_type_asset, basic_type_shot, basic_type_seq]
+
 
     # entry
     entry_type = ConstantInfo('%s%sentry' % (SDAT, SEP), 'entry', 'list of option with or without usd prim')
@@ -51,7 +53,7 @@ class RootDefinition(object):
         opinion_shot_geom,
         sub_layer_type]
 
-    _all__ = basic_types + usd_layer_types + sda_type
+    _all__ =  usd_layer_types + basic_types + sda_type
 
  
 
