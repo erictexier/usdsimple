@@ -1,8 +1,10 @@
 from usd_pipe.usd.core.xroot import XassetChar
-# from . import xroot 
+
+# from . import xroot
 print(xroot.XassetChar("toto"))
 
 class_serialize = object
+
 
 class Xscene(class_serialize):
     Property = "Xscene"
@@ -13,16 +15,12 @@ class Xscene(class_serialize):
         self.tag = tag
 
     @classmethod
-    def context_factory(cls, 
-                        default_classes,
-                        base_class=None,
-                        upmethod = None
-                        log=None):
-        """Generic class creation 
+    def context_factory(cls, default_classes, base_class=None, upmethod=None, log=None):
+        """Generic class creation
         Args:
             default_classes
-        
-        
+
+
         """
 
         result = dict()
@@ -45,7 +43,13 @@ class Xscene(class_serialize):
                     "__doc__": "py representation %s" % class_base,
                 }
             )
-            class_def.append(type(cls.PrefixNaming + class_base, (base_class,), upmethod,))
+            class_def.append(
+                type(
+                    cls.PrefixNaming + class_base,
+                    (base_class,),
+                    upmethod,
+                )
+            )
 
         cls.__filter.update(default_classes)
         named = [x.Property for x in class_def]

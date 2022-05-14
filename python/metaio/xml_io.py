@@ -5,6 +5,7 @@ import xml.dom
 from xml.sax.saxutils import escape, unescape
 import xml.etree.cElementTree as ET
 
+
 class XmlIO(object):
     log = None
 

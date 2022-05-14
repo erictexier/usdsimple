@@ -5,6 +5,8 @@ import logging
 
 # Local
 from metaio.xml_io import XmlIO
+
+
 class GenericXml(object):
     __slots__ = ["__children", "__parent", "__verbose", "__xmltag"]
     Property = "GenericXml"
@@ -136,7 +138,7 @@ class GenericXml(object):
         pass
 
     def to_key_value(self, key=None):
-        """ mapping key, value for saving in xml """
+        """mapping key, value for saving in xml"""
         return "", None
 
     def get_tag(self):
@@ -168,7 +170,9 @@ class GenericXml(object):
                 d.update({key: self.__dict__[key]})
 
         info = "{} {}: {}".format(
-            tab, self.Property, pformat(d).replace("OrderedDict([", "")[:-2],
+            tab,
+            self.Property,
+            pformat(d).replace("OrderedDict([", "")[:-2],
         )
         if self.log is not None and self.__verbose == True:
             self.log.info(info)

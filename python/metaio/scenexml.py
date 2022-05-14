@@ -156,7 +156,13 @@ class SceneXml(GenericXml):
                     "__doc__": "py representation %s" % classRoot,
                 }
             )
-            class_def.append(type(classRoot + "Xml", (mother_class,), upmethod,))
+            class_def.append(
+                type(
+                    classRoot + "Xml",
+                    (mother_class,),
+                    upmethod,
+                )
+            )
         cls.__filter.update(default_classes)
         named = [x.Property for x in class_def]
         result = dict(zip(named, class_def))
@@ -605,7 +611,7 @@ class InstanceSceneXml(SceneXml):
         return None
 
     def get_attribute(self, name):
-        """ for now attribute of the same type will collapse"""
+        """for now attribute of the same type will collapse"""
         for ch in self.get_children():
             for cch in ch.get_children():
                 if cch.name == name:
