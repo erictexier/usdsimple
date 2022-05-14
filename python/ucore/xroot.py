@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 
-class ConstantInfo(namedtuple('ConstantInfo', 'name type doc')):
+class ConstantInfo(namedtuple('ConstantInfo', 'tag type doc')):
     __slots__ = ()
 
 
@@ -10,7 +10,7 @@ class RootDefinition(object):
     SDAT = 'sda'
     SEP = '::'
 
-    # basic type
+    # basic new type
     basic_type_asset = ConstantInfo('%s%sasset' % (SDAT, SEP), 'asset', 'can be instanced from a shot')
     basic_type_shot = ConstantInfo('%s%sshot' % (SDAT, SEP), 'shot', 'collection of asset instance')
     basic_type_seq = ConstantInfo('%s%sseq' % (SDAT, SEP), 'sequence', 'collection of shot')
@@ -21,108 +21,121 @@ class RootDefinition(object):
     layer_type_payload = ConstantInfo('%s%spayload' % (SDAT, SEP), 'payload', 'refer a payload type layer')
     layer_type_reference = ConstantInfo('%s%sreference' % (SDAT, SEP), 'reference', 'refer a reference type layer')
     layer_type_sublayer = ConstantInfo('%s%ssublayer' % (SDAT, SEP), 'sublayer', 'refer a sublayer type layer')
+    layer_type_empty = ConstantInfo('%s%sempty' % (SDAT, SEP), 'empty', 'refer to an empty layer')
 
-    # opinion for model
-    layer_type_opinion = ConstantInfo('%s%sopinion_type' % (SDAT, SEP), 'opinion', 'the type option')
-    opinion_desc = ConstantInfo('%s%sopinion_geom' % (SDAT, SEP), 'description', 'model variant identificator')
-    opinion_geom = ConstantInfo('%s%sopinion_desc' % (SDAT, SEP), 'geometry', 'the geom identificator')
+    usd_layer_types = [layer_type_payload, layer_type_reference, layer_type_sublayer, layer_type_empty]
 
+    # entry
+    entry_type = ConstantInfo('%s%sentry' % (SDAT, SEP), 'entry', 'list of option with or without usd prim')
 
-    layer_types = [layer_type_payload, layer_type_reference, layer_type_sublayer, layer_type_opinion]
+    # opinion for asset 
+    opinion_asset = ConstantInfo('%s%sopinion_asset' % (SDAT, SEP), 'opinionasset', 'type opinion for asset')
+    opinion_asset_desc = ConstantInfo('%s%sopinion_asset_desc' % (SDAT, SEP), 'descriptionasset', 'model variant identificator')
+    opinion_asset_geom = ConstantInfo('%s%sopinion_asset_geom' % (SDAT, SEP), 'geometryasset', 'the geom identificator')
+
+    # opinion for shot
+    opinion_shot = ConstantInfo('%s%sopinion_shot' % (SDAT, SEP), 'opinionshot', 'type opinion for shot')
+    opinion_shot_manifest = ConstantInfo('%s%sopinion_shot_manifest' % (SDAT, SEP), 'descriptionshot', 'model variant identificator')
+    opinion_shot_geom = ConstantInfo('%s%sopinion_shot_geom' % (SDAT, SEP), 'geometryshot', 'the geom identificator')
+
+    # sublayer
+    sub_layer_type = ConstantInfo('%s%ssublayer_type' % (SDAT, SEP), 'sublayer', 'other')
+
+    sda_type = [
+        entry_type,
+        opinion_asset,
+        opinion_asset_desc,
+        opinion_asset_geom,
+        opinion_shot,
+        opinion_shot_manifest,
+        opinion_shot_geom,
+        sub_layer_type]
+
+    _all__ = basic_types + usd_layer_types + sda_type
+
+ 
 
 SCH_DEF =  RootDefinition
 
-class Modelvariant(namedtuple('modelvariant', 'name step model_variant_name')):
-    __slots__ = ()
-
+########################################################
 # definition class hierachy
 # base
 class Xroot(object):
-    VALID_LAYER_TYPE = set()
-    def __init__(self, atype):
-        self._type = '%s%s' % (SCH_DEF.SDAT, atype)
+    def __init__(self, tag):
+        self._tag = tag
 
 class XLayerType(Xroot):
-    def __init__(self, name, layertype):
-        super(XLayerType, self).__init__(layertype)
-        self.name = name
+    def __init__(self, tag):
+        super(XLayerType, self).__init__(tag)
         self.downstream = list()
         self.parent = None
-
-    def add_downstream(self, child):
-        self.downstream.append(child)
-        if isinstance(child, XLayerType):
-            self.downstream.append(child)
-            child.parent = self
 
     def add_downstreams(self, children):
         for child in children:
             if isinstance(child, XLayerType):
                 self.downstream.append(child)
                 child.parent = self
-
-class XrootEntry(XLayerType):
-    def __init__(self, name, atype):
-        super(XrootEntry, self).__init__(name, atype)
-
     def get_sublayers(self):
         return self.downstream
 
+class XrootEntry(XLayerType):
+    def __init__(self):
+        super(XrootEntry, self).__init__(SCH_DEF.entry_type.tag)
+
     def __repr__(self):
-        return 'type %s, name %s, downstream %s' % (self._type, self.name, [x.name for x in self.downstream])
+        return 'type %s, tag %s, downstream %s' % (self._type, self.tag, [x.tag for x in self.downstream])
 
 
-# opinions
+##########################################################
+# sublayer entry type
+
+class XShotlayer(XLayerType):
+    def __init__(self, tag, step):
+        self.step = step
+        self.geom = XLayerType(SCH_DEF.opinion_geom.tag, SCH_DEF.opinion_geom.type)
+        super(XShotlayer, self).__init__(tag, SCH_DEF.layer_type_opinion.type)
+
 class XassetOpinion(XLayerType):
-    def __init__(self, name, step, model_variant_name):
+    def __init__(self, tag, step, model_variant_name):
         self.step = step
         self.model_variant_name = model_variant_name
-        self.description = XLayerType(SCH_DEF.opinion_desc.name, SCH_DEF.opinion_desc.type)
-        self.geom = XLayerType(SCH_DEF.opinion_geom.name, SCH_DEF.opinion_geom.type)
-        super(XassetOpinion, self).__init__(name, SCH_DEF.layer_type_opinion.type)
+        self.description = XLayerType(SCH_DEF.opinion_desc.tag, SCH_DEF.opinion_desc.type)
+        self.geom = XLayerType(SCH_DEF.opinion_geom.tag, SCH_DEF.opinion_geom.type)
+        super(XassetOpinion, self).__init__(tag, SCH_DEF.layer_type_opinion.type)
         self.add_downstreams([self.description, self.geom])
 
-
-class XShotLayers(XLayerType):
-    def __init__(self, name, step):
-        self.step = step
-        self.description = XLayerType(SCH_DEF.opinion_desc.name, SCH_DEF.opinion_desc.type)
-        self.geom = XLayerType(SCH_DEF.opinion_geom.name, SCH_DEF.opinion_geom.type)
-        super(XShotLayers, self).__init__(name, SCH_DEF.layer_type_opinion.type)
-        
 
 # basic type
 class XassetElement(XLayerType):
     SHOW_OPINIONS = []
-    def __init__(self, name):
+    def __init__(self, tag):
         list_of_downstream = []
         for x in self.SHOW_OPINIONS:
             list_of_downstream.append(
-                XassetOpinion(x.name, x.step, x.model_variant_name)
+                XassetOpinion(x.tag, x.step, x.model_variant_tag)
             )
-        super(XassetElement, self).__init__(name, SCH_DEF.basic_type_elm.type, list_of_downstream)
+        super(XassetElement, self).__init__(tag, SCH_DEF.basic_type_elm.type, list_of_downstream)
 
 class XassetChar(XLayerType):
     SHOW_OPINIONS = []
-    def __init__(self, name):
+    def __init__(self, tag):
         list_of_downstream = []
         for x in self.SHOW_OPINIONS:
-            print('x'*30, x)
             list_of_downstream.append(
-                XassetOpinion(x.name, x.step, x.model_variant_name)
+                XassetOpinion(x.tag, x.step, x.model_variant_name)
             )
-        super(XassetChar, self).__init__(name, SCH_DEF.basic_type_char.type, list_of_downstream)
+        super(XassetChar, self).__init__(tag, SCH_DEF.basic_type_char.type, list_of_downstream)
 
 
 class Xshot(XrootEntry):
     SHOW_OPINIONS = []
-    def __init__(self, name):
+    def __init__(self, tag):
         list_of_downstream = []
         for x in self.SHOW_OPINIONS:
             list_of_downstream.append(
-                XShotLayers(x.name, x.step)
+                XShotLayers(x.tag, x.step)
             )
-        super(Xshot, self).__init__(name, SCH_DEF.basic_type_shot.type, list_of_downstream)
+        super(Xshot, self).__init__(tag, SCH_DEF.basic_type_shot.type, list_of_downstream)
 
 
 class Xscene(object):
