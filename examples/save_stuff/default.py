@@ -1,25 +1,26 @@
 from pxr import Usd, Sdf, UsdGeom
 
-cube = '''#usda 1.0
+cube = """#usda 1.0
 def Xform "geo"
 {
     def Cube "cube"
     {
     }
-}'''
-sphere = '''#usda 1.0
+}"""
+sphere = """#usda 1.0
 def Xform "geo"
 {
     def Sphere "sphere"
     {
     }
-}'''
+}"""
 
 
 def MakeLayer(filename, text):
     l = Sdf.Layer.CreateNew(filename)
     l.ImportFromString(text)
     return l
+
 
 defaultlayer = MakeLayer("cube.usda", cube)
 stage = Usd.Stage.Open(defaultlayer)

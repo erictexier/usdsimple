@@ -154,13 +154,6 @@ class XRootEntry(XSublayer):
         super(XRootEntry, self).__init__(SCH_DEF.entry_type.tag)
 
 
-Entry = {
-    "SHOT": XRootEntry,
-    "ELEM": XRootEntry,
-    "CHAR": XRootEntry,
-    "SEQ": XRootEntry,
-    "LOC": XRootEntry,
-}
 
 
 ##########################################################

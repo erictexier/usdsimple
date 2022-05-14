@@ -27,15 +27,16 @@
 from pxr import Sdf, Tf
 import itertools, unittest
 
+
 class TestSdfPayload(unittest.TestCase):
     def test_Basic(self):
         emptyPayload = Sdf.Payload()
 
         # Generate a bunch of unique payloads
         args = [
-            ['assetPath', ['', '//test/layer.sdf']],
-            ['primPath', ['', '/rootPrim', '/rootPrim/child']],
-            ['layerOffset', [Sdf.LayerOffset(),  Sdf.LayerOffset(48, -2)]]
+            ["assetPath", ["", "//test/layer.sdf"]],
+            ["primPath", ["", "/rootPrim", "/rootPrim/child"]],
+            ["layerOffset", [Sdf.LayerOffset(), Sdf.LayerOffset(48, -2)]],
         ]
         payloads = []
         for values in itertools.product(*[a[1] for a in args]):
@@ -47,14 +48,14 @@ class TestSdfPayload(unittest.TestCase):
 
             payload = Sdf.Payload(**kw)
 
-            payloads.append( payload )
+            payloads.append(payload)
 
             # Test property access
             for arg, value in argvalues:
                 if arg in kw:
-                    self.assertEqual( getattr(payload, arg), value )
+                    self.assertEqual(getattr(payload, arg), value)
                 else:
-                    self.assertEqual( getattr(payload, arg), getattr(emptyPayload, arg) )
+                    self.assertEqual(getattr(payload, arg), getattr(emptyPayload, arg))
 
         # Sort using <
         payloads.sort()
@@ -69,8 +70,8 @@ class TestSdfPayload(unittest.TestCase):
                 self.assertEqual((a != b), (i != j))
                 self.assertEqual((a <= b), (i <= j))
                 self.assertEqual((a >= b), (i >= j))
-                self.assertEqual((a  < b), (i  < j))
-                self.assertEqual((a  > b), (i  > j))
+                self.assertEqual((a < b), (i < j))
+                self.assertEqual((a > b), (i > j))
 
         # Test repr
         for payload in payloads:
@@ -78,12 +79,11 @@ class TestSdfPayload(unittest.TestCase):
 
         # Test invalid asset paths.
         with self.assertRaises(Tf.ErrorException):
-            p = Sdf.Payload('\x01\x02\x03')
+            p = Sdf.Payload("\x01\x02\x03")
 
         with self.assertRaises(Tf.ErrorException):
-            p = Sdf.AssetPath('\x01\x02\x03')
-            p = Sdf.AssetPath('foobar', '\x01\x02\x03')
-            
+            p = Sdf.AssetPath("\x01\x02\x03")
+            p = Sdf.AssetPath("foobar", "\x01\x02\x03")
 
 
 if __name__ == "__main__":
