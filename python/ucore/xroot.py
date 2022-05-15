@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 
 
@@ -102,24 +103,66 @@ SCH_DEF = RootDefinition
 # definition class hierachy
 # base
 class XRoot(object):
+    """ Can be XmlGeneric later in progress """
     def __init__(self, tag):
-        self._tag = tag
+        super(XRoot, self).__init__()
+        assert tag is not None
+        self.__children = []
+        self.__verbose = True
+        self.__parent = None
+        self.__xmltag = tag
 
+
+    @classmethod
+    def set_log(cls, log=None):
+        """
+        Args:
+            log(logging handle): use by all instances
+        """
+        if cls.log is None and log is None:
+            cls.log = logging.getLogger(__name__)
+        else:
+            cls.log = log
+
+    def set_parent(self, parent):
+        self.__parent = parent
+
+    def get_parent(self):
+        return self.__parent
+
+    def get_children(self):
+        return self.__children
+
+    def set_children(self, children, root=None):
+        assert isinstance(children, list)
+        if children is not None:
+            self.__children = children
+        for ch in children:
+            ch.set_parent(self)
+            if root:
+                ch.register(root)
+
+    def add_child(self, ch):
+        if ch == None:
+            return False
+        if self.__children == None:
+            self.__children = list()
+        self.__children.append(ch)
+        ch.set_parent(self)
+        return True
+
+    def register(self, root=None):
+        pass
+
+    def get_register(self):
+        return list()
 
 class XLayerType(XRoot):
     def __init__(self, tag):
         super(XLayerType, self).__init__(tag)
-        self.downstream = list()
-        self.parent = None
-
-    def add_downstreams(self, children):
-        for child in children:
-            if isinstance(child, XLayerType):
-                self.downstream.append(child)
-                child.parent = self
 
     def get_sublayers(self):
-        return self.downstream
+        return self.get_children()
 
     def __repr__(self):
         return "type %s, tag %s, downstream %s" % (
@@ -148,35 +191,24 @@ class XEmpty(XLayerType):
     def __init__(self):
         super(XEmpty, self).__init__(SCH_DEF.layer_type_empty.tag)
 
-
+##########################################################
+# sublayer entry type
 class XRootEntry(XSublayer):
     def __init__(self):
         super(XRootEntry, self).__init__(SCH_DEF.entry_type.tag)
 
 
+class XAssetOpinion(XSublayer):
+    def __init__(self):
+        super(XAssetOpinion, self).__init__(SCH_DEF.opinion_asset.tag)
 
 
-##########################################################
-# sublayer entry type
+class XShotOpinion(XSublayer):
+    def __init__(self):
+        super(XShotOpinion, self).__init__(SCH_DEF.opinion_shot.tag)
 
+###########
 
-class XShotlayer(XLayerType):
-    def __init__(self, tag, step):
-        self.step = step
-        self.geom = XLayerType(SCH_DEF.opinion_geom.tag, SCH_DEF.opinion_geom.type)
-        super(XShotlayer, self).__init__(tag, SCH_DEF.layer_type_opinion.type)
-
-
-class XassetOpinion(XLayerType):
-    def __init__(self, tag, step, model_variant_name):
-        self.step = step
-        self.model_variant_name = model_variant_name
-        self.description = XLayerType(
-            SCH_DEF.opinion_desc.tag, SCH_DEF.opinion_desc.type
-        )
-        self.geom = XLayerType(SCH_DEF.opinion_geom.tag, SCH_DEF.opinion_geom.type)
-        super(XassetOpinion, self).__init__(tag, SCH_DEF.layer_type_opinion.type)
-        self.add_downstreams([self.description, self.geom])
 
 
 # basic type
