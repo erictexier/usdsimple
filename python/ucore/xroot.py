@@ -164,13 +164,6 @@ class XLayerType(XRoot):
     def get_sublayers(self):
         return self.get_children()
 
-    def __repr__(self):
-        return "type %s, tag %s, downstream %s" % (
-            self._type,
-            self.tag,
-            [x.tag for x in self.downstream],
-        )
-
 
 class XPayload(XLayerType):
     def __init__(self):
