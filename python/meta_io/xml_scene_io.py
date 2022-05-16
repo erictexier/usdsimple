@@ -9,8 +9,7 @@ import json
 import xml.etree.cElementTree as ET
 
 # local
-from dsk.base.utils import disk_utils
-from metaio.xml_io import XmlIO
+from meta_io.xml_io import XmlIO
 
 
 class XmlSceneIO(XmlIO):

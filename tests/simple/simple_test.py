@@ -43,7 +43,7 @@ CSTTYPE = [
 
 
 def test_import_xroot():
-    from ucore.xroot import SCH_DEF
+    from xcore.xscene import SCH_DEF
 
     assert CSTTAG == [x.tag for x in SCH_DEF._all__]
     assert CSTTYPE == [x.type for x in SCH_DEF._all__]

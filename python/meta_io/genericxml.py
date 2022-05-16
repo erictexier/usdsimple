@@ -4,7 +4,7 @@ import collections
 import logging
 
 # Local
-from metaio.xml_io import XmlIO
+from meta_io.xml_io import XmlIO
 
 
 class GenericXml(object):
