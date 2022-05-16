@@ -1,8 +1,22 @@
-import logging
-from collections import namedtuple
+
+from collections import defaultdict
 from xcore.xscene_schema import XSceneSchema as SCH_DEF
 from meta_io.genericxml import GenericXml
  
+class constant(object):
+    """
+    list of xmltag to map factory to
+    """
+
+    # for scenegraph
+    attrlist = "arbitraryList"
+    instance = "instance"
+    scatter = "scatter"
+    group = "group"
+    scenetag = "scenegraphXML3D"
+    lookfile = "lookFile"
+    bounds = "bounds"
+    xform = "xform"
 
 ########################################################
 # definition class hierachy
@@ -163,8 +177,25 @@ class XLocLayer(XSublayer):
 
 ###########
 
+class FromSptConfig(XScene):
+    """Top level node for a bams queriable scenegraph (optional)"""
+    Property = "RootDefinition"
+
+    def __init__(self, tag=constant.scenetag):
+        super(FromSptConfig, self).__init__(tag)
+        self.__registered = defaultdict(list)
+        # registe self as first one only
+        if self.Property not in self.__registered:
+            self.__registered[self.Property].append(self)
+
+    def get_name(self):
+        return ""
 
 
+
+_Generator = {
+    "ymlconfig": FromSptConfig,
+}
 """
 _Generator = {
     "scenegraph": XRootEntry,
