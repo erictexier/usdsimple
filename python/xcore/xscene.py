@@ -109,6 +109,7 @@ class XScene(GenericXml):
         result = dict(zip(named, class_def))
         result.update({"default": SceneDefault})
         return result
+
 class XLayerType(XScene):
     def __init__(self, tag):
         super(XLayerType, self).__init__(tag)
@@ -161,6 +162,7 @@ class XLocLayer(XSublayer):
         super(XLocLayer, self).__init__(SCH_DEF.other_layer_type.tag)
 
 ###########
+
 
 
 """

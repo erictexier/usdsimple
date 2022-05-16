@@ -23,6 +23,7 @@ CSTTAG = [
     "sda::opinion_shot_geom",
     "sda::sublayer_type",
 ]
+
 CSTTYPE = [
     "payload",
     "reference",
@@ -45,10 +46,12 @@ CSTTYPE = [
 def test_import_xroot():
     from xcore.xscene import SCH_DEF
 
-    assert CSTTAG == [x.tag for x in SCH_DEF._all__]
+    cstag = [tag.replace("::", SCH_DEF.SEP) for tag in CSTTAG]
+
+    assert cstag == [x.tag for x in SCH_DEF._all__]
     assert CSTTYPE == [x.type for x in SCH_DEF._all__]
     key = SCH_DEF.SDAT + SCH_DEF.SEP
-    for x in CSTTAG:
+    for x in cstag:
         assert x.startswith(key)
 
 
