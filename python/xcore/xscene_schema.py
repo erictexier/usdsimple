@@ -3,7 +3,7 @@ from collections import namedtuple
 
 
 
-class ConstantInfo(namedtuple("ConstantInfo", "tag type doc")):
+class ConstantInfo(namedtuple("ConstantInfo", "tag Property doc")):
     __slots__ = ()
 
 
@@ -85,7 +85,7 @@ class XSceneSchema(object):
 
     # sublayer
     other_layer_type = ConstantInfo(
-        "%s%ssublayer_type" % (SDAT, SEP), "sublayer", "other"
+        "%s%sothersublayer_type" % (SDAT, SEP), "othersublayer", "other"
     )
 
     sda_type_all = [

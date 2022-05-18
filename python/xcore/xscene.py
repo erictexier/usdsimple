@@ -125,8 +125,9 @@ class XScene(GenericXml):
         return result
 
 class XLayerType(XScene):
-    def __init__(self, tag):
-        super(XLayerType, self).__init__(tag)
+    Property = SCH_DEF.layer_type_sublayer.Property
+    def __init__(self):
+        super(XLayerType, self).__init__(SCH_DEF.layer_type_sublayer.tag)
 
     def get_sublayers(self):
         return self.get_children()
@@ -134,44 +135,54 @@ class XLayerType(XScene):
 ##########################################################
 # USD sublayer
 class XPayload(XLayerType):
+    Property = SCH_DEF.layer_type_payload.Property
     def __init__(self):
         super(XPayload, self).__init__(SCH_DEF.layer_type_payload.tag)
 
 
 class XReference(XLayerType):
+    Property = SCH_DEF.layer_type_reference.Property
     def __init__(self):
         super(XReference, self).__init__(SCH_DEF.layer_type_reference.tag)
 
 
 class XSublayer(XLayerType):
+    Property = SCH_DEF.layer_type_sublayer.Property
     def __init__(self):
         super(XSublayer, self).__init__(SCH_DEF.layer_type_sublayer.tag)
 
 
 class XEmpty(XLayerType):
+    Property = SCH_DEF.layer_type_empty.Property
     def __init__(self):
         super(XEmpty, self).__init__(SCH_DEF.layer_type_empty.tag)
 
 ##########################################################
 # sublayer entry type
 class XRootEntry(XSublayer):
+    Property = SCH_DEF.entry_type.Property
     def __init__(self):
         super(XRootEntry, self).__init__(SCH_DEF.entry_type.tag)
 
 
 class XAssetOpinion(XSublayer):
+    Property = SCH_DEF.opinion_asset.Property
     def __init__(self):
         super(XAssetOpinion, self).__init__(SCH_DEF.opinion_asset.tag)
 
 class XShotOpinion(XSublayer):
+    Property = SCH_DEF.opinion_shot.Property
     def __init__(self):
         super(XShotOpinion, self).__init__(SCH_DEF.opinion_shot.tag)
 
+### not finished
 class XSeqLayer(XSublayer):
+    Property = SCH_DEF.other_layer_type.Property
     def __init__(self):
         super(XSeqLayer, self).__init__(SCH_DEF.other_layer_type.tag)
 
 class XLocLayer(XSublayer):
+    Property = SCH_DEF.other_layer_type.Property
     def __init__(self):
         super(XLocLayer, self).__init__(SCH_DEF.other_layer_type.tag)
 

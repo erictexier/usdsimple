@@ -21,7 +21,7 @@ CSTTAG = [
     "sda::opinion_shot",
     "sda::opinion_shot_manifest",
     "sda::opinion_shot_geom",
-    "sda::sublayer_type",
+    "sda::othersublayer_type",
 ]
 
 CSTTYPE = [
@@ -39,7 +39,7 @@ CSTTYPE = [
     "opinionshot",
     "descriptionshot",
     "geometryshot",
-    "sublayer",
+    "othersublayer",
 ]
 
 
@@ -49,11 +49,11 @@ def test_import_xroot():
     cstag = [tag.replace("::", SCH_DEF.SEP) for tag in CSTTAG]
 
     assert cstag == [x.tag for x in SCH_DEF._all__]
-    assert CSTTYPE == [x.type for x in SCH_DEF._all__]
+    assert CSTTYPE == [x.Property for x in SCH_DEF._all__]
     key = SCH_DEF.SDAT + SCH_DEF.SEP
     for x in cstag:
         assert x.startswith(key)
-
-
+    assert len(cstag) == len(set(cstag))
+    assert len(CSTTYPE) == len(set(CSTTYPE))
 def test_xroot_class():
     pass
