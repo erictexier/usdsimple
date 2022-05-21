@@ -13,48 +13,77 @@ class XSceneSchema(object):
     SDAT = "sda"
     SEP = "::"
 
+    ############################################################################
     # usd layer type
-    layer_type_payload = ConstantInfo(
+    Layer_Type_payload = ConstantInfo(
         "%s%spayload" % (SDAT, SEP), "payload", "refer a payload type layer"
     )
-    layer_type_reference = ConstantInfo(
+    Layer_Type_reference = ConstantInfo(
         "%s%sreference" % (SDAT, SEP), "reference", "refer a reference type layer"
     )
-    layer_type_sublayer = ConstantInfo(
+    Layer_Type_sublayer = ConstantInfo(
         "%s%ssublayer" % (SDAT, SEP), "sublayer", "refer a sublayer type layer"
     )
-    layer_type_empty = ConstantInfo(
+    Layer_Type_empty = ConstantInfo(
         "%s%sempty" % (SDAT, SEP), "empty", "refer to an empty layer"
     )
 
     # a list of usd layer type definition
-    usd_layer_types = [
-        layer_type_payload,
-        layer_type_reference,
-        layer_type_sublayer,
-        layer_type_empty,
+    USD_LAYERS = [
+        Layer_Type_payload,
+        Layer_Type_reference,
+        Layer_Type_sublayer,
+        Layer_Type_empty,
     ]
 
-    # basic new type
-    basic_type_asset = ConstantInfo(
+    ############################################################################
+    # Base GEOM
+    Layer_Type_asset = ConstantInfo(
         "%s%sasset" % (SDAT, SEP), "asset", "can be instanced from a shot"
     )
-    basic_type_shot = ConstantInfo(
-        "%s%sshot" % (SDAT, SEP), "shot", "collection of asset instance"
+    Layer_Type_shot = ConstantInfo(
+        "%s%sshot" % (SDAT, SEP), "shot", "collection of animation, location, ligth, camera"
     )
-    basic_type_seq = ConstantInfo(
-        "%s%sseq" % (SDAT, SEP), "sequence", "collection of shot"
+    Layer_Type_seq = ConstantInfo(
+        "%s%ssequence" % (SDAT, SEP), "sequence", "collection of shot"
     )
-
+    Layer_Type_loc = ConstantInfo(
+        "%s%slocation" % (SDAT, SEP), "location", "layout, camera... "
+    )
     # a list of base entity definition
-    basic_types = [basic_type_asset, basic_type_shot, basic_type_seq]
+    BASE_GEOM_LAYER = [Layer_Type_asset, Layer_Type_shot, Layer_Type_seq, Layer_Type_loc]
 
 
+    ############################################################################
     # entry
-    entry_type = ConstantInfo(
+    Entry_Type = ConstantInfo(
         "%s%sentry" % (SDAT, SEP), "entry", "list of option with or without usd prim"
     )
 
+    # entry
+    Entry_Type_asset = ConstantInfo(
+        "%s%sentryasset" % (SDAT, SEP), "entryasset", "list of option with or without usd prim"
+    )
+
+    # entry
+    Entry_Type_shot = ConstantInfo(
+        "%s%sentryshot" % (SDAT, SEP), "entryshot", "list of option with or without usd prim"
+    )
+
+    # entry
+    Entry_Type_seq = ConstantInfo(
+        "%s%sentrysequence" % (SDAT, SEP), "entrysequence", "list of option with or without usd prim"
+    )
+
+    # entry
+    Entry_Type_loc = ConstantInfo(
+        "%s%sentrylocation" % (SDAT, SEP), "entrylocation", "list of option with or without usd prim"
+    )
+    ENTRIES_LAYER = [Entry_Type, Entry_Type_asset, Entry_Type_shot, Entry_Type_seq, Entry_Type_loc]
+
+
+    ############################################################################
+    # SUBLAYERS
     # opinion for asset
     opinion_asset = ConstantInfo(
         "%s%sopinion_asset" % (SDAT, SEP), "opinionasset", "type opinion for asset"
@@ -70,6 +99,8 @@ class XSceneSchema(object):
         "the geom identifier",
     )
 
+    OPINION_ASSET = [opinion_asset, opinion_asset_desc, opinion_asset_geom]
+
     # opinion for shot
     opinion_shot = ConstantInfo(
         "%s%sopinion_shot" % (SDAT, SEP), "opinionshot", "type opinion for shot"
@@ -77,26 +108,15 @@ class XSceneSchema(object):
     opinion_shot_manifest = ConstantInfo(
         "%s%sopinion_shot_manifest" % (SDAT, SEP),
         "descriptionshot",
-        "model variant identifier",
+        "shot sublayer identifier",
     )
     opinion_shot_geom = ConstantInfo(
         "%s%sopinion_shot_geom" % (SDAT, SEP), "geometryshot", "the geom identifier"
     )
-
     # sublayer
-    other_layer_type = ConstantInfo(
-        "%s%sothersublayer_type" % (SDAT, SEP), "othersublayer", "other"
+    other_Layer_Type = ConstantInfo(
+        "%s%sothersubLayer_Type" % (SDAT, SEP), "othersublayer", "other"
     )
+    OPINION_SHOT = [opinion_shot, opinion_shot_manifest, opinion_shot_geom]
 
-    sda_type_all = [
-        entry_type,
-        opinion_asset,
-        opinion_asset_desc,
-        opinion_asset_geom,
-        opinion_shot,
-        opinion_shot_manifest,
-        opinion_shot_geom,
-        other_layer_type,
-    ]
-
-    _all__ = usd_layer_types + basic_types + sda_type_all
+    _all__ = USD_LAYERS + BASE_GEOM_LAYER + ENTRIES_LAYER  + OPINION_ASSET + OPINION_SHOT + [other_Layer_Type]
