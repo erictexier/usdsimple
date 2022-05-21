@@ -11,17 +11,25 @@ CSTTAG = [
     "sda::reference",
     "sda::sublayer",
     "sda::empty",
+
     "sda::asset",
     "sda::shot",
-    "sda::seq",
+    "sda::sequence",
+    "sda::location",
+
     "sda::entry",
+    "sda::entryasset",
+    "sda::entryshot",
+    "sda::entrysequence",
+    "sda::entrylocation",
+
     "sda::opinion_asset",
     "sda::opinion_asset_desc",
     "sda::opinion_asset_geom",
     "sda::opinion_shot",
     "sda::opinion_shot_manifest",
     "sda::opinion_shot_geom",
-    "sda::othersublayer_type",
+    "sda::othersubLayer_Type",
 ]
 
 CSTTYPE = [
@@ -29,16 +37,26 @@ CSTTYPE = [
     "reference",
     "sublayer",
     "empty",
+
     "asset",
     "shot",
     "sequence",
+    "location",
+
     "entry",
+    "entryasset",
+    "entryshot",
+    "entrysequence",
+    "entrylocation",
+
     "opinionasset",
     "descriptionasset",
     "geometryasset",
+
     "opinionshot",
     "descriptionshot",
     "geometryshot",
+
     "othersublayer",
 ]
 
@@ -53,6 +71,7 @@ def test_import_xroot():
     key = SCH_DEF.SDAT + SCH_DEF.SEP
     for x in cstag:
         assert x.startswith(key)
+    # no double
     assert len(cstag) == len(set(cstag))
     assert len(CSTTYPE) == len(set(CSTTYPE))
 def test_xroot_class():
