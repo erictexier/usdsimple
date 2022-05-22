@@ -12,10 +12,11 @@ CSTTAG = [
     "sda::sublayer",
     "sda::empty",
 
-    "sda::asset",
-    "sda::shot",
-    "sda::sequence",
-    "sda::location",
+    "sda::stage",
+    "sda::stageasset",
+    "sda::stageshot",
+    "sda::stagesequence",
+    "sda::stagelocation",
 
     "sda::entry",
     "sda::entryasset",
@@ -38,10 +39,11 @@ CSTTYPE = [
     "sublayer",
     "empty",
 
-    "asset",
-    "shot",
-    "sequence",
-    "location",
+    "stage",
+    "stageasset",
+    "stageshot",
+    "stagesequence",
+    "stagelocation",
 
     "entry",
     "entryasset",
@@ -74,5 +76,11 @@ def test_import_xroot():
     # no double
     assert len(cstag) == len(set(cstag))
     assert len(CSTTYPE) == len(set(CSTTYPE))
+
+
+
 def test_xroot_class():
-    pass
+    from xcore.xscene import _XGen
+    assert len(CSTTYPE) == len(_XGen.keys())
+    for x in _XGen:
+        assert _XGen[x]

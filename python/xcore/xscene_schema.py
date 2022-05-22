@@ -37,21 +37,24 @@ class XSceneSchema(object):
     ]
 
     ############################################################################
-    # Base GEOM
-    Layer_Type_asset = ConstantInfo(
-        "%s%sasset" % (SDAT, SEP), "asset", "can be instanced from a shot"
+    # Base STAGE
+    Stage_Type = ConstantInfo(
+        "%s%sstage" % (SDAT, SEP), "stage", "can be instanced from a shot"
     )
-    Layer_Type_shot = ConstantInfo(
-        "%s%sshot" % (SDAT, SEP), "shot", "collection of animation, location, ligth, camera"
+    Stage_Type_asset = ConstantInfo(
+        "%s%sstageasset" % (SDAT, SEP), "stageasset", "can be instanced from a shot"
     )
-    Layer_Type_seq = ConstantInfo(
-        "%s%ssequence" % (SDAT, SEP), "sequence", "collection of shot"
+    Stage_Type_shot = ConstantInfo(
+        "%s%sstageshot" % (SDAT, SEP), "stageshot", "collection of animation, location, ligth, camera"
     )
-    Layer_Type_loc = ConstantInfo(
-        "%s%slocation" % (SDAT, SEP), "location", "layout, camera... "
+    Stage_Type_seq = ConstantInfo(
+        "%s%sstagesequence" % (SDAT, SEP), "stagesequence", "collection of shot"
+    )
+    Stage_Type_loc = ConstantInfo(
+        "%s%sstagelocation" % (SDAT, SEP), "stagelocation", "layout, camera... "
     )
     # a list of base entity definition
-    BASE_GEOM_LAYER = [Layer_Type_asset, Layer_Type_shot, Layer_Type_seq, Layer_Type_loc]
+    BASE_STAGE = [Stage_Type, Stage_Type_asset, Stage_Type_shot, Stage_Type_seq, Stage_Type_loc]
 
 
     ############################################################################
@@ -113,10 +116,13 @@ class XSceneSchema(object):
     opinion_shot_geom = ConstantInfo(
         "%s%sopinion_shot_geom" % (SDAT, SEP), "geometryshot", "the geom identifier"
     )
-    # sublayer
-    other_Layer_Type = ConstantInfo(
+    # to keep going
+    Layer_Type_layer_other = ConstantInfo(
         "%s%sothersubLayer_Type" % (SDAT, SEP), "othersublayer", "other"
     )
+
     OPINION_SHOT = [opinion_shot, opinion_shot_manifest, opinion_shot_geom]
 
-    _all__ = USD_LAYERS + BASE_GEOM_LAYER + ENTRIES_LAYER  + OPINION_ASSET + OPINION_SHOT + [other_Layer_Type]
+    OPINIONS = OPINION_ASSET + OPINION_SHOT + [Layer_Type_layer_other]
+
+    _all__ = USD_LAYERS + BASE_STAGE + ENTRIES_LAYER  + OPINIONS

@@ -3,20 +3,11 @@ from collections import defaultdict
 from xcore.xscene_schema import XSceneSchema as SCH_DEF
 from meta_io.genericxml import GenericXml
  
-class constant(object):
+class xconstant(object):
     """
     list of xmltag to map factory to
     """
-
-    # for scenegraph
-    attrlist = "arbitraryList"
-    instance = "instance"
-    scatter = "scatter"
-    group = "group"
-    scenetag = "scenegraphXML3D"
-    lookfile = "lookFile"
-    bounds = "bounds"
-    xform = "xform"
+    pass
 
 ########################################################
 # definition class hierachy
@@ -128,9 +119,38 @@ class XLayerType(XScene):
     Property = SCH_DEF.Layer_Type_sublayer.Property
     def __init__(self):
         super(XLayerType, self).__init__(SCH_DEF.Layer_Type_sublayer.tag)
+        self._filetype = ""
+        self._fields = dict()
 
     def get_sublayers(self):
         return self.get_children()
+
+##########################################################
+class XStage(XScene):
+    Property = SCH_DEF.Stage_Type.Property
+    def __init__(self):
+        super(XStage, self).__init__(SCH_DEF.Stage_Type.tag)
+        self.filename = ""
+
+class XStageAsset(XScene):
+    Property = SCH_DEF.Stage_Type_asset.Property
+    def __init__(self):
+        super(XStageAsset, self).__init__(SCH_DEF.Stage_Type_asset.tag)
+
+class XStageShot(XScene):
+    Property = SCH_DEF.Stage_Type_shot.Property
+    def __init__(self):
+        super(XStageShot, self).__init__(SCH_DEF.Stage_Type_shot.tag)
+
+class XStageSeq(XScene):
+    Property = SCH_DEF.Stage_Type_seq.Property
+    def __init__(self):
+        super(XStageSeq, self).__init__(SCH_DEF.Stage_Type_seq.tag)
+
+class XStageLoc(XScene):
+    Property = SCH_DEF.Stage_Type_loc.Property
+    def __init__(self):
+        super(XStageLoc, self).__init__(SCH_DEF.Stage_Type_loc.tag)
 
 ##########################################################
 # USD sublayer
@@ -164,32 +184,95 @@ class XRootEntry(XSublayer):
     def __init__(self):
         super(XRootEntry, self).__init__(SCH_DEF.Entry_Type.tag)
 
+class XRootEntryAsset(XRootEntry):
+    Property = SCH_DEF.Entry_Type_asset.Property
+    def __init__(self):
+        super(XRootEntryAsset, self).__init__(SCH_DEF.Entry_Type_asset.tag)
+        self.asset_type = None
 
+class XRootEntryShot(XRootEntry):
+    Property = SCH_DEF.Entry_Type_shot.Property
+    def __init__(self):
+        super(XRootEntryShot, self).__init__(SCH_DEF.Entry_Type_shot.tag)
+
+class XRootEntrySequence(XRootEntry):
+    Property = SCH_DEF.Entry_Type_seq.Property
+    def __init__(self):
+        super(XRootEntrySequence, self).__init__(SCH_DEF.Entry_Type_seq.tag)
+
+class XRootEntryLocation(XRootEntry):
+    Property = SCH_DEF.Entry_Type_loc.Property
+    def __init__(self):
+        super(XRootEntryLocation, self).__init__(SCH_DEF.Entry_Type_loc.tag)
+
+# opinions
 class XAssetOpinion(XSublayer):
     Property = SCH_DEF.opinion_asset.Property
     def __init__(self):
         super(XAssetOpinion, self).__init__(SCH_DEF.opinion_asset.tag)
+
+class XAssetOpinionDesc(XAssetOpinion):
+    Property = SCH_DEF.opinion_asset_desc.Property
+    def __init__(self):
+        super(XAssetOpinionDesc, self).__init__(SCH_DEF.opinion_asset_desc.tag)
+
+class XAssetOpinionGeom(XAssetOpinion):
+    Property = SCH_DEF.opinion_asset_geom.Property
+    def __init__(self):
+        super(XAssetOpinionGeom, self).__init__(SCH_DEF.opinion_asset_geom.tag)
+
 
 class XShotOpinion(XSublayer):
     Property = SCH_DEF.opinion_shot.Property
     def __init__(self):
         super(XShotOpinion, self).__init__(SCH_DEF.opinion_shot.tag)
 
-### not finished
-class XSeqLayer(XSublayer):
-    Property = SCH_DEF.Layer_Type_sublayer.Property
+class XShotOpinionManifest(XShotOpinion):
+    Property = SCH_DEF.opinion_shot_manifest.Property
     def __init__(self):
-        super(XSeqLayer, self).__init__(SCH_DEF.Layer_Type_sublayer.tag)
+        super(XShotOpinionManifest, self).__init__(SCH_DEF.opinion_shot_manifest.tag)
 
-class XLocLayer(XSublayer):
-    Property = SCH_DEF.Layer_Type_sublayer.Property
+class XShotOpinionGeom(XShotOpinion):
+    Property = SCH_DEF.opinion_shot_geom.Property
     def __init__(self):
-        super(XLocLayer, self).__init__(SCH_DEF.Layer_Type_sublayer.tag)
+        super(XShotOpinionGeom, self).__init__(SCH_DEF.opinion_shot_geom.tag)
 
+
+### need more work later for seq and loc
+class XLayerOther(XSublayer):
+    Property = SCH_DEF.Layer_Type_layer_other.Property
+    def __init__(self):
+        super(XLayerOther, self).__init__(SCH_DEF.Layer_Type_layer_other.tag)
+
+# final gather
+_XGen = {
+    XStage.Property: XStage,
+    XStageAsset.Property: XStageAsset,
+    XStageShot.Property: XStageShot,
+    XStageSeq.Property: XStageSeq,
+    XStageLoc.Property: XStageLoc,
+    XLayerType.Property : XLayerType,
+    XPayload.Property : XPayload,
+    XReference.Property : XReference,
+    XSublayer.Property: XSublayer,
+    XEmpty.Property: XEmpty,
+    XRootEntry.Property: XRootEntry,
+    XRootEntryAsset.Property: XRootEntryAsset,
+    XRootEntryShot.Property:XRootEntryShot,
+    XRootEntrySequence.Property:XRootEntrySequence,
+    XRootEntryLocation.Property:XRootEntryLocation,
+    XAssetOpinion.Property:XAssetOpinion,
+    XAssetOpinionDesc.Property: XAssetOpinionDesc,
+    XAssetOpinionGeom.Property: XAssetOpinionGeom,
+    XShotOpinion.Property: XShotOpinion,
+    XShotOpinionManifest.Property: XShotOpinionManifest,
+    XShotOpinionGeom.Property: XShotOpinionGeom,
+    XLayerOther.Property: XLayerOther
+}
 ###########
-
+'''
 class FromSptConfig(XScene):
-    """Top level node for a bams queriable scenegraph (optional)"""
+    """Top level node for a queriable scenegraph (optional)"""
     Property = "RootDefinition"
 
     def __init__(self, tag=constant.scenetag):
@@ -202,7 +285,7 @@ class FromSptConfig(XScene):
     def get_name(self):
         return ""
 
-
+    def build_from_conf(self, conf):
 
 _Generator = {
     "ymlconfig": FromSptConfig,
@@ -222,4 +305,4 @@ _Generator = {
     constant.instancemtl: InstanceMtlXml,
 }
 _Generator.update(InstanceXScene.get_factory())
-"""
+'''
