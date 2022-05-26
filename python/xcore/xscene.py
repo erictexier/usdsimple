@@ -116,11 +116,12 @@ class XScene(GenericXml):
         return result
 
 class XLayerType(XScene):
-    Property = SCH_DEF.Layer_Type_sublayer.Property
-    def __init__(self):
-        super(XLayerType, self).__init__(SCH_DEF.Layer_Type_sublayer.tag)
-        self._filetype = ""
-        self._fields = dict()
+    Property = SCH_DEF.Layer_Type_layer.Property
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Layer_Type_layer.tag if tag is None else tag
+        super(XLayerType, self).__init__(tag)
+        self.filetype = ""
+        self.fields = dict()
 
     def get_sublayers(self):
         return self.get_children()
@@ -156,37 +157,41 @@ class XStageLoc(XScene):
 # USD sublayer
 class XPayload(XLayerType):
     Property = SCH_DEF.Layer_Type_payload.Property
-    def __init__(self):
-        super(XPayload, self).__init__(SCH_DEF.Layer_Type_payload.tag)
-
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Layer_Type_payload.tag if tag is None else tag
+        super(XPayload, self).__init__(tag)
 
 class XReference(XLayerType):
     Property = SCH_DEF.Layer_Type_reference.Property
-    def __init__(self):
-        super(XReference, self).__init__(SCH_DEF.Layer_Type_reference.tag)
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Layer_Type_reference.tag if tag is None else tag
+        super(XReference, self).__init__(tag)
 
 
 class XSublayer(XLayerType):
     Property = SCH_DEF.Layer_Type_sublayer.Property
-    def __init__(self):
-        super(XSublayer, self).__init__(SCH_DEF.Layer_Type_sublayer.tag)
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Layer_Type_sublayer.tag if tag is None else tag
+        super(XSublayer, self).__init__(tag)
 
 
 class XEmpty(XLayerType):
     Property = SCH_DEF.Layer_Type_empty.Property
-    def __init__(self):
-        super(XEmpty, self).__init__(SCH_DEF.Layer_Type_empty.tag)
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Layer_Type_empty.tag if tag is None else tag
+        super(XEmpty, self).__init__(tag)
 
 ##########################################################
 # sublayer entry type
 class XRootEntry(XSublayer):
     Property = SCH_DEF.Entry_Type.Property
-    def __init__(self):
-        super(XRootEntry, self).__init__(SCH_DEF.Entry_Type.tag)
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Entry_Type.tag if tag is None else tag
+        super(XRootEntry, self).__init__(tag)
 
 class XRootEntryAsset(XRootEntry):
     Property = SCH_DEF.Entry_Type_asset.Property
-    def __init__(self):
+    def __init__(self, asset_type = None):
         super(XRootEntryAsset, self).__init__(SCH_DEF.Entry_Type_asset.tag)
         self.asset_type = None
 
@@ -207,35 +212,37 @@ class XRootEntryLocation(XRootEntry):
 
 # opinions
 class XAssetOpinion(XSublayer):
-    Property = SCH_DEF.opinion_asset.Property
-    def __init__(self):
-        super(XAssetOpinion, self).__init__(SCH_DEF.opinion_asset.tag)
+    Property = SCH_DEF.Opinion_asset.Property
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Opinion_asset.tag if tag is None else tag
+        super(XAssetOpinion, self).__init__(tag)
 
 class XAssetOpinionDesc(XAssetOpinion):
-    Property = SCH_DEF.opinion_asset_desc.Property
+    Property = SCH_DEF.Opinion_asset_desc.Property
     def __init__(self):
-        super(XAssetOpinionDesc, self).__init__(SCH_DEF.opinion_asset_desc.tag)
+        super(XAssetOpinionDesc, self).__init__(SCH_DEF.Opinion_asset_desc.tag)
 
 class XAssetOpinionGeom(XAssetOpinion):
-    Property = SCH_DEF.opinion_asset_geom.Property
+    Property = SCH_DEF.Opinion_asset_geom.Property
     def __init__(self):
-        super(XAssetOpinionGeom, self).__init__(SCH_DEF.opinion_asset_geom.tag)
+        super(XAssetOpinionGeom, self).__init__(SCH_DEF.Opinion_asset_geom.tag)
 
 
 class XShotOpinion(XSublayer):
-    Property = SCH_DEF.opinion_shot.Property
-    def __init__(self):
-        super(XShotOpinion, self).__init__(SCH_DEF.opinion_shot.tag)
+    Property = SCH_DEF.Opinion_shot.Property
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Opinion_shot.tag if tag is None else tag
+        super(XShotOpinion, self).__init__(tag)
 
 class XShotOpinionManifest(XShotOpinion):
-    Property = SCH_DEF.opinion_shot_manifest.Property
+    Property = SCH_DEF.Opinion_shot_manifest.Property
     def __init__(self):
-        super(XShotOpinionManifest, self).__init__(SCH_DEF.opinion_shot_manifest.tag)
+        super(XShotOpinionManifest, self).__init__(SCH_DEF.Opinion_shot_manifest.tag)
 
 class XShotOpinionGeom(XShotOpinion):
-    Property = SCH_DEF.opinion_shot_geom.Property
+    Property = SCH_DEF.Opinion_shot_geom.Property
     def __init__(self):
-        super(XShotOpinionGeom, self).__init__(SCH_DEF.opinion_shot_geom.tag)
+        super(XShotOpinionGeom, self).__init__(SCH_DEF.Opinion_shot_geom.tag)
 
 
 ### need more work later for seq and loc
@@ -246,63 +253,26 @@ class XLayerOther(XSublayer):
 
 # final gather
 _XGen = {
-    XStage.Property: XStage,
-    XStageAsset.Property: XStageAsset,
-    XStageShot.Property: XStageShot,
-    XStageSeq.Property: XStageSeq,
-    XStageLoc.Property: XStageLoc,
-    XLayerType.Property : XLayerType,
-    XPayload.Property : XPayload,
-    XReference.Property : XReference,
-    XSublayer.Property: XSublayer,
-    XEmpty.Property: XEmpty,
-    XRootEntry.Property: XRootEntry,
-    XRootEntryAsset.Property: XRootEntryAsset,
-    XRootEntryShot.Property:XRootEntryShot,
-    XRootEntrySequence.Property:XRootEntrySequence,
-    XRootEntryLocation.Property:XRootEntryLocation,
-    XAssetOpinion.Property:XAssetOpinion,
-    XAssetOpinionDesc.Property: XAssetOpinionDesc,
-    XAssetOpinionGeom.Property: XAssetOpinionGeom,
-    XShotOpinion.Property: XShotOpinion,
-    XShotOpinionManifest.Property: XShotOpinionManifest,
-    XShotOpinionGeom.Property: XShotOpinionGeom,
-    XLayerOther.Property: XLayerOther
+    SCH_DEF.Layer_Type_layer.tag : XLayerType,
+    SCH_DEF.Stage_Type.tag : XStage,
+    SCH_DEF.Stage_Type_asset.tag : XStageAsset,
+    SCH_DEF.Stage_Type_shot.tag : XStageShot,
+    SCH_DEF.Stage_Type_seq.tag : XStageSeq,
+    SCH_DEF.Stage_Type_loc.tag : XStageLoc,
+    SCH_DEF.Layer_Type_payload.tag : XPayload,
+    SCH_DEF.Layer_Type_reference.tag : XReference,
+    SCH_DEF.Layer_Type_sublayer.tag : XSublayer,
+    SCH_DEF.Layer_Type_empty.tag : XEmpty,
+    SCH_DEF.Entry_Type.tag : XRootEntry,
+    SCH_DEF.Entry_Type_asset.tag : XRootEntryAsset,
+    SCH_DEF.Entry_Type_shot.tag : XRootEntryShot,
+    SCH_DEF.Entry_Type_seq.tag : XRootEntrySequence,
+    SCH_DEF.Entry_Type_loc.tag : XRootEntryLocation,
+    SCH_DEF.Opinion_asset.tag : XAssetOpinion,
+    SCH_DEF.Opinion_asset_desc.tag : XAssetOpinionDesc,
+    SCH_DEF.Opinion_asset_geom.tag : XAssetOpinionGeom,
+    SCH_DEF.Opinion_shot.tag : XShotOpinion,
+    SCH_DEF.Opinion_shot_manifest.tag : XShotOpinionManifest,
+    SCH_DEF.Opinion_shot_geom.tag : XShotOpinionGeom,
+    SCH_DEF.Layer_Type_layer_other.tag : XLayerOther
 }
-###########
-'''
-class FromSptConfig(XScene):
-    """Top level node for a queriable scenegraph (optional)"""
-    Property = "RootDefinition"
-
-    def __init__(self, tag=constant.scenetag):
-        super(FromSptConfig, self).__init__(tag)
-        self.__registered = defaultdict(list)
-        # registe self as first one only
-        if self.Property not in self.__registered:
-            self.__registered[self.Property].append(self)
-
-    def get_name(self):
-        return ""
-
-    def build_from_conf(self, conf):
-
-_Generator = {
-    "ymlconfig": FromSptConfig,
-}
-"""
-_Generator = {
-    "scenegraph": XRootEntry,
-    "scenegraphXML3D": ScenegraphXml,
-    "group": GroupXScene,
-    "reference": InstanceXScene,
-    "abc": InstanceXScene,
-    constant.instanceanim: InstanceAnimXScene,
-    constant.instancecrowds: InstanceCrowdsXScene,
-    constant.instancecamera: InstanceCameraXScene,
-    constant.instancescatter: InstanceScatterXScene,
-    constant.instanceasset: InstanceSAsset,
-    constant.instancemtl: InstanceMtlXml,
-}
-_Generator.update(InstanceXScene.get_factory())
-'''

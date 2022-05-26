@@ -7,6 +7,7 @@ def test_simple(a, b):
 
 
 CSTTAG = [
+    "sda::layer",
     "sda::payload",
     "sda::reference",
     "sda::sublayer",
@@ -34,6 +35,7 @@ CSTTAG = [
 ]
 
 CSTTYPE = [
+    "layer",
     "payload",
     "reference",
     "sublayer",
@@ -83,4 +85,4 @@ def test_xroot_class():
     from xcore.xscene import _XGen
     assert len(CSTTYPE) == len(_XGen.keys())
     for x in _XGen:
-        assert _XGen[x]
+        assert _XGen[x]()

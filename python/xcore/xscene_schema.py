@@ -11,10 +11,13 @@ class ConstantInfo(namedtuple("ConstantInfo", "tag Property doc")):
 class XSceneSchema(object):
     """Collection of ConstantInfo"""
     SDAT = "sda"
-    SEP = "::"
+    SEP = "_"
 
     ############################################################################
     # usd layer type
+    Layer_Type_layer = ConstantInfo(
+        "%s%slayer" % (SDAT, SEP), "layer", "refer a layer type layer"
+    )
     Layer_Type_payload = ConstantInfo(
         "%s%spayload" % (SDAT, SEP), "payload", "refer a payload type layer"
     )
@@ -30,6 +33,7 @@ class XSceneSchema(object):
 
     # a list of usd layer type definition
     USD_LAYERS = [
+        Layer_Type_layer,
         Layer_Type_payload,
         Layer_Type_reference,
         Layer_Type_sublayer,
@@ -88,32 +92,32 @@ class XSceneSchema(object):
     ############################################################################
     # SUBLAYERS
     # opinion for asset
-    opinion_asset = ConstantInfo(
+    Opinion_asset = ConstantInfo(
         "%s%sopinion_asset" % (SDAT, SEP), "opinionasset", "type opinion for asset"
     )
-    opinion_asset_desc = ConstantInfo(
+    Opinion_asset_desc = ConstantInfo(
         "%s%sopinion_asset_desc" % (SDAT, SEP),
         "descriptionasset",
         "model variant identifier",
     )
-    opinion_asset_geom = ConstantInfo(
+    Opinion_asset_geom = ConstantInfo(
         "%s%sopinion_asset_geom" % (SDAT, SEP),
         "geometryasset",
         "the geom identifier",
     )
 
-    OPINION_ASSET = [opinion_asset, opinion_asset_desc, opinion_asset_geom]
+    OPINION_ASSET = [Opinion_asset, Opinion_asset_desc, Opinion_asset_geom]
 
     # opinion for shot
-    opinion_shot = ConstantInfo(
+    Opinion_shot = ConstantInfo(
         "%s%sopinion_shot" % (SDAT, SEP), "opinionshot", "type opinion for shot"
     )
-    opinion_shot_manifest = ConstantInfo(
+    Opinion_shot_manifest = ConstantInfo(
         "%s%sopinion_shot_manifest" % (SDAT, SEP),
         "descriptionshot",
         "shot sublayer identifier",
     )
-    opinion_shot_geom = ConstantInfo(
+    Opinion_shot_geom = ConstantInfo(
         "%s%sopinion_shot_geom" % (SDAT, SEP), "geometryshot", "the geom identifier"
     )
     # to keep going
@@ -121,7 +125,7 @@ class XSceneSchema(object):
         "%s%sothersubLayer_Type" % (SDAT, SEP), "othersublayer", "other"
     )
 
-    OPINION_SHOT = [opinion_shot, opinion_shot_manifest, opinion_shot_geom]
+    OPINION_SHOT = [Opinion_shot, Opinion_shot_manifest, Opinion_shot_geom]
 
     OPINIONS = OPINION_ASSET + OPINION_SHOT + [Layer_Type_layer_other]
 

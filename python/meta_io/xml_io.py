@@ -63,12 +63,16 @@ class XmlIO(object):
         anode = None
         if instance is None:
             return None
-
+        print(all_class_dict.keys())
+        print("x"*20, instance.tag, instance.tag in all_class_dict)
         if instance.tag in all_class_dict:
+            print(instance.tag)
             anode = all_class_dict[instance.tag](tag=instance.tag)
+            print("anode", anode, anode.name)
             anode.set_attribute_xml(instance)
         else:
             # wrap  scenegraphXML
+            print("NNNNNNN", instance.tag)
             atype = instance.get("baseType")
             if atype is None:
                 atype = instance.get("type")
@@ -90,7 +94,8 @@ class XmlIO(object):
         if root is None:
             root = anode
         children = list()
-        for inst in instance.getchildren():
+        print("aaaaaaaa",root, instance)
+        for inst in list(instance): # instance.getchildren():
             ch = self.recurse_instance_xml(inst, all_class_dict, root)
             if ch is not None:
                 children.append(ch)
