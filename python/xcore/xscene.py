@@ -4,7 +4,7 @@ from xcore.xscene_schema import XSceneSchema as SCH_DEF
 from meta_io.genericxml import GenericXml
 import json
 import base64 
-
+decodebytes
 class xconstant(object):
     """
     list of xmltag to map factory to
@@ -377,5 +377,6 @@ _XGenerator = {
     SCH_DEF.Layer_Type_layer_other.tag : XLayerOther,
 
     xconstant.variants : VariantsInstance,
-    xconstant.fields : FieldsInstance
+    xconstant.fields : FieldsInstance,
+    xconstant.attribute: InstanceAttrib
 }

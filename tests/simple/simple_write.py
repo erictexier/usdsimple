@@ -44,3 +44,4 @@ def test_config_read():
             print("\t%s" % z.Property)
             for k in z.get_children():
                 print("\t\t%s" % k.Property)
+                print("\t\t\t%s" % k.get_children())

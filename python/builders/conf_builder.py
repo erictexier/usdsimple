@@ -4,6 +4,7 @@ from xcore.xscene import (
     XAssetOpinionDesc,
     XAssetOpinionGeom,
     FieldsInstance,
+    InstanceAttrib,
     XLayerOther)
 
 from xcore import xscene
@@ -27,6 +28,9 @@ class Configuration(XScene):
         self.add_child(entry_e)
         for i in range(3):
             x = XAssetOpinionDesc()
+            ai = InstanceAttrib()
+            ai.set_data_with_type({'name': 'anewname', 'value' : {'[gabc]': '.abc', '[geovar]' : 'model'}})
+            x.add_child(ai)
             y = XAssetOpinionGeom()
             if i==2:
                 print("oops")
