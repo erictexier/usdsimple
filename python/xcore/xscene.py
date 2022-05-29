@@ -1,10 +1,19 @@
 
+import sys
 from collections import defaultdict
 from xcore.xscene_schema import XSceneSchema as SCH_DEF
 from meta_io.genericxml import GenericXml
 import json
-import base64 
-decodebytes
+PY3 = False
+if sys.version_info.major == 3:
+    from base64 import encodebytes as b64encode
+    from base64 import decodebytes as b64decode
+    PY3 = True
+else:
+    from base64 import encodestring as b64encode
+    from base64 import decodestring as b64decode
+ 
+
 class xconstant(object):
     """
     list of xmltag to map factory to
@@ -306,12 +315,20 @@ class InstanceAttrib(XScene):
 
     def do_encode_value(self, value):
         # the test for this encoding and xml is not done TODO.
-        self.value = base64.encodestring(json.dumps(value))
+        
+        if PY3:
+            self.value = b64encode(bytes(json.dumps(value), "UTF-8")).decode('UTF-8')
+        else:
+            self.value = b64encode(json.dumps(value))
+
         self.type = xconstant.encoded
         return self.value
 
     def decode_value(self):
-        self.value = json.loads(base64.decodestring(self.value))
+        if PY3:
+            self.value = json.loads(b64decode(bytes(self.value, "UTF-8")).decode('UTF-8'))
+        else:
+            self.value = json.loads(b64decode(self.value))
         self.type = xconstant.decoded
         return self.value
 

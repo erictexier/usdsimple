@@ -15,6 +15,7 @@ class XmlIO(object):
         "'": "&apos;",
         '"': "&quot;",
     }
+
     _xml_special_chars_re = re.compile("({})".format("|".join(_xml_special_chars)))
 
     def __init__(self):
