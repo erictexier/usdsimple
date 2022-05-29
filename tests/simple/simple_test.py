@@ -82,7 +82,7 @@ def test_import_xroot():
 
 
 def test_xroot_class():
-    from xcore.xscene import _XGen
-    assert len(CSTTYPE) == len(_XGen.keys())
-    for x in _XGen:
-        assert _XGen[x]()
+    from xcore.xscene import _XGenerator
+    assert len(CSTTYPE) == len(_XGenerator.keys())
+    for x in _XGenerator:
+        assert _XGenerator[x]()

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 from meta_io.xml_scene_io import XmlSceneIO
 from xcore.xscene import XScene
 #from xcore.xscene import FromSptConfig
-from xcore.xscene import xconstant, _XGen
+from xcore.xscene import xconstant, _XGenerator
 from builders.conf_builder import _ConfigurationGen
 
 
@@ -58,7 +58,7 @@ class SchemaScene(object):
 
 
 ####
-def write_config(topnode, scene_out="toto.xml"):
+def write_config(topnode, scene_out):
     if not XmlSceneIO.write_scene(topnode, scene_out):
         logger.error("ERROR saving")
     else:
@@ -67,7 +67,7 @@ def write_config(topnode, scene_out="toto.xml"):
 def read_config(scene_in="toto.xml"):
     all_class_name = XScene.factory([], None)
 
-    # all_class_name.update(_XGen)
+    all_class_name.update(_XGenerator)
     all_class_name.update(_ConfigurationGen)
     return XmlSceneIO.read_scene(scene_in, all_class_name)
 

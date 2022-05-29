@@ -3,6 +3,7 @@ from xcore.xscene import (
     XRootEntryAsset,
     XAssetOpinionDesc,
     XAssetOpinionGeom,
+    FieldsInstance,
     XLayerOther)
 
 from xcore import xscene
@@ -22,13 +23,20 @@ class Configuration(XScene):
 
 
     def build_from_ymal_config(self, confdata):
-        entry_e = XRootEntryAsset("elem")
+        entry_e = XRootEntryAsset()
         self.add_child(entry_e)
         for i in range(3):
             x = XAssetOpinionDesc()
             y = XAssetOpinionGeom()
+            if i==2:
+                print("oops")
+                y.set_fields({'toto': 3, 'tata': 'somedata'})
+                y.name = "withfield"
             y.add_child(x)
             entry_e.add_child(y)
+            at = FieldsInstance()
+            at.set_key("toto%d" % i)
+            y.add_child(at)
         return self
 
 _ConfigurationGen = {

@@ -160,6 +160,7 @@ class GenericXml(object):
             max_char(int): clip the value of attrib
             tab(string): indent
         """
+
         d = collections.OrderedDict()
         for key in self.__dict__:
             if key.startswith("_"):
@@ -174,6 +175,7 @@ class GenericXml(object):
             self.Property,
             pformat(d).replace("OrderedDict([", "")[:-2],
         )
+
         if self.log is not None and self.__verbose == True:
             self.log.info(info)
         for ch in self.__children:

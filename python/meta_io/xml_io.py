@@ -63,39 +63,31 @@ class XmlIO(object):
         anode = None
         if instance is None:
             return None
-        print(all_class_dict.keys())
-        print("x"*20, instance.tag, instance.tag in all_class_dict)
         if instance.tag in all_class_dict:
-            print(instance.tag)
             anode = all_class_dict[instance.tag](tag=instance.tag)
-            print("anode", anode, anode.name)
             anode.set_attribute_xml(instance)
         else:
-            # wrap  scenegraphXML
-            print("NNNNNNN", instance.tag)
-            atype = instance.get("baseType")
-            if atype is None:
-                atype = instance.get("type")
+            # check for type
+            atype = instance.get("type")
             if atype is None:
                 atype = instance.tag
-
             if atype in all_class_dict:
                 anode = all_class_dict[atype](tag=instance.tag)
                 anode.set_attribute_xml(instance)
-            else:
-                if self.log:
-                    if atype is not None:
-                        self.log.warning("not found {}".format(atype))
-                    else:
-                        raise Exception("None value")
+            elif "default" in all_class_dict:
                 anode = all_class_dict["default"](tag=instance.tag)
                 anode.set_attribute_xml(instance)
+            elif self.log:
+                self.log.error("No Generator found")
+                return None
+            else:
+                raise
 
         if root is None:
             root = anode
         children = list()
-        print("aaaaaaaa",root, instance)
-        for inst in list(instance): # instance.getchildren():
+
+        for inst in list(instance):
             ch = self.recurse_instance_xml(inst, all_class_dict, root)
             if ch is not None:
                 children.append(ch)

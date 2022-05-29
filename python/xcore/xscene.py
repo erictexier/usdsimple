@@ -2,12 +2,19 @@
 from collections import defaultdict
 from xcore.xscene_schema import XSceneSchema as SCH_DEF
 from meta_io.genericxml import GenericXml
- 
+import json
+import base64 
+
 class xconstant(object):
     """
     list of xmltag to map factory to
     """
-    pass
+
+    attribute = "attribute"
+    encoded = "encoded"
+    decoded = "decoded"
+    fields = "%s%sfields" % (SCH_DEF.SDAT, SCH_DEF.SEP)
+    variants = "%s%svariants" % (SCH_DEF.SDAT, SCH_DEF.SEP)
 
 ########################################################
 # definition class hierachy
@@ -116,67 +123,75 @@ class XScene(GenericXml):
         return result
 
 class XLayerType(XScene):
-    Property = SCH_DEF.Layer_Type_layer.Property
+    Property = SCH_DEF.Layer_Type_layer.tag
     def __init__(self, tag=None):
         tag = SCH_DEF.Layer_Type_layer.tag if tag is None else tag
         super(XLayerType, self).__init__(tag)
         self.filetype = ""
-        self.fields = dict()
+        self._fields = dict()
+
+    def set_fields(self, adict):
+        self._fields.update(adict)
 
     def get_sublayers(self):
         return self.get_children()
 
 ##########################################################
 class XStage(XScene):
-    Property = SCH_DEF.Stage_Type.Property
-    def __init__(self):
-        super(XStage, self).__init__(SCH_DEF.Stage_Type.tag)
+    Property = SCH_DEF.Stage_Type.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Stage_Type.tag if tag is None else tag
+        super(XStage, self).__init__(tag)
         self.filename = ""
 
 class XStageAsset(XScene):
-    Property = SCH_DEF.Stage_Type_asset.Property
-    def __init__(self):
-        super(XStageAsset, self).__init__(SCH_DEF.Stage_Type_asset.tag)
+    Property = SCH_DEF.Stage_Type_asset.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Stage_Type_asset.tag if tag is None else tag
+        super(XStageAsset, self).__init__(tag)
 
 class XStageShot(XScene):
-    Property = SCH_DEF.Stage_Type_shot.Property
-    def __init__(self):
-        super(XStageShot, self).__init__(SCH_DEF.Stage_Type_shot.tag)
+    Property = SCH_DEF.Stage_Type_shot.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Stage_Type_shot.tag if tag is None else tag
+        super(XStageShot, self).__init__(tag)
 
 class XStageSeq(XScene):
-    Property = SCH_DEF.Stage_Type_seq.Property
-    def __init__(self):
-        super(XStageSeq, self).__init__(SCH_DEF.Stage_Type_seq.tag)
+    Property = SCH_DEF.Stage_Type_seq.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Stage_Type_seq.tag if tag is None else tag
+        super(XStageSeq, self).__init__(tag)
 
 class XStageLoc(XScene):
-    Property = SCH_DEF.Stage_Type_loc.Property
-    def __init__(self):
-        super(XStageLoc, self).__init__(SCH_DEF.Stage_Type_loc.tag)
+    Property = SCH_DEF.Stage_Type_loc.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Stage_Type_loc.tag if tag is None else tag
+        super(XStageLoc, self).__init__(tag)
 
 ##########################################################
 # USD sublayer
 class XPayload(XLayerType):
-    Property = SCH_DEF.Layer_Type_payload.Property
+    Property = SCH_DEF.Layer_Type_payload.tag
     def __init__(self, tag=None):
         tag = SCH_DEF.Layer_Type_payload.tag if tag is None else tag
         super(XPayload, self).__init__(tag)
 
 class XReference(XLayerType):
-    Property = SCH_DEF.Layer_Type_reference.Property
+    Property = SCH_DEF.Layer_Type_reference.tag
     def __init__(self, tag=None):
         tag = SCH_DEF.Layer_Type_reference.tag if tag is None else tag
         super(XReference, self).__init__(tag)
 
 
 class XSublayer(XLayerType):
-    Property = SCH_DEF.Layer_Type_sublayer.Property
+    Property = SCH_DEF.Layer_Type_sublayer.tag
     def __init__(self, tag=None):
         tag = SCH_DEF.Layer_Type_sublayer.tag if tag is None else tag
         super(XSublayer, self).__init__(tag)
 
 
 class XEmpty(XLayerType):
-    Property = SCH_DEF.Layer_Type_empty.Property
+    Property = SCH_DEF.Layer_Type_empty.tag
     def __init__(self, tag=None):
         tag = SCH_DEF.Layer_Type_empty.tag if tag is None else tag
         super(XEmpty, self).__init__(tag)
@@ -184,75 +199,160 @@ class XEmpty(XLayerType):
 ##########################################################
 # sublayer entry type
 class XRootEntry(XSublayer):
-    Property = SCH_DEF.Entry_Type.Property
+    Property = SCH_DEF.Entry_Type.tag
     def __init__(self, tag=None):
         tag = SCH_DEF.Entry_Type.tag if tag is None else tag
         super(XRootEntry, self).__init__(tag)
 
 class XRootEntryAsset(XRootEntry):
-    Property = SCH_DEF.Entry_Type_asset.Property
-    def __init__(self, asset_type = None):
-        super(XRootEntryAsset, self).__init__(SCH_DEF.Entry_Type_asset.tag)
+    Property = SCH_DEF.Entry_Type_asset.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Entry_Type_asset.tag if tag is None else tag
+        super(XRootEntryAsset, self).__init__(tag)
         self.asset_type = None
 
+    def set_asset_type(self, a_type_asset):
+        self.asset_type = a_type_asset
+
 class XRootEntryShot(XRootEntry):
-    Property = SCH_DEF.Entry_Type_shot.Property
-    def __init__(self):
-        super(XRootEntryShot, self).__init__(SCH_DEF.Entry_Type_shot.tag)
+    Property = SCH_DEF.Entry_Type_shot.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Entry_Type_shot.tag if tag is None else tag
+        super(XRootEntryShot, self).__init__(tag)
 
 class XRootEntrySequence(XRootEntry):
-    Property = SCH_DEF.Entry_Type_seq.Property
-    def __init__(self):
-        super(XRootEntrySequence, self).__init__(SCH_DEF.Entry_Type_seq.tag)
+    Property = SCH_DEF.Entry_Type_seq.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Entry_Type_seq.tag if tag is None else tag
+        super(XRootEntrySequence, self).__init__(tag)
 
 class XRootEntryLocation(XRootEntry):
-    Property = SCH_DEF.Entry_Type_loc.Property
-    def __init__(self):
-        super(XRootEntryLocation, self).__init__(SCH_DEF.Entry_Type_loc.tag)
+    Property = SCH_DEF.Entry_Type_loc.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Entry_Type_loc.tag if tag is None else tag
+        super(XRootEntryLocation, self).__init__(tag)
 
 # opinions
 class XAssetOpinion(XSublayer):
-    Property = SCH_DEF.Opinion_asset.Property
+    Property = SCH_DEF.Opinion_asset.tag
     def __init__(self, tag=None):
         tag = SCH_DEF.Opinion_asset.tag if tag is None else tag
         super(XAssetOpinion, self).__init__(tag)
+        self.f_step = "[department]"
 
 class XAssetOpinionDesc(XAssetOpinion):
-    Property = SCH_DEF.Opinion_asset_desc.Property
-    def __init__(self):
-        super(XAssetOpinionDesc, self).__init__(SCH_DEF.Opinion_asset_desc.tag)
+    Property = SCH_DEF.Opinion_asset_desc.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Opinion_asset_desc.tag if tag is None else tag
+        super(XAssetOpinionDesc, self).__init__(tag)
+
 
 class XAssetOpinionGeom(XAssetOpinion):
-    Property = SCH_DEF.Opinion_asset_geom.Property
-    def __init__(self):
-        super(XAssetOpinionGeom, self).__init__(SCH_DEF.Opinion_asset_geom.tag)
+    Property = SCH_DEF.Opinion_asset_geom.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Opinion_asset_geom.tag if tag is None else tag
+        super(XAssetOpinionGeom, self).__init__(tag)
 
 
 class XShotOpinion(XSublayer):
-    Property = SCH_DEF.Opinion_shot.Property
+    Property = SCH_DEF.Opinion_shot.tag
     def __init__(self, tag=None):
         tag = SCH_DEF.Opinion_shot.tag if tag is None else tag
         super(XShotOpinion, self).__init__(tag)
 
 class XShotOpinionManifest(XShotOpinion):
-    Property = SCH_DEF.Opinion_shot_manifest.Property
-    def __init__(self):
-        super(XShotOpinionManifest, self).__init__(SCH_DEF.Opinion_shot_manifest.tag)
+    Property = SCH_DEF.Opinion_shot_manifest.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Opinion_shot_manifest.tag if tag is None else tag
+        super(XShotOpinionManifest, self).__init__(tag)
 
 class XShotOpinionGeom(XShotOpinion):
-    Property = SCH_DEF.Opinion_shot_geom.Property
-    def __init__(self):
-        super(XShotOpinionGeom, self).__init__(SCH_DEF.Opinion_shot_geom.tag)
+    Property = SCH_DEF.Opinion_shot_geom.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Opinion_shot_geom.tag if tag is None else tag
+        super(XShotOpinionGeom, self).__init__(tag)
 
 
 ### need more work later for seq and loc
 class XLayerOther(XSublayer):
-    Property = SCH_DEF.Layer_Type_layer_other.Property
-    def __init__(self):
-        super(XLayerOther, self).__init__(SCH_DEF.Layer_Type_layer_other.tag)
+    Property = SCH_DEF.Layer_Type_layer_other.tag
+    def __init__(self, tag=None):
+        tag = SCH_DEF.Layer_Type_layer_other.tag if tag is None else tag
+        super(XLayerOther, self).__init__(tag)
+
+
+class InstanceAttrib(XScene):
+    """Basic stupid Attribute class,  value are string with type named
+    support only str, float and int for now
+    """
+
+    Property = "ATTRIBUTE"
+    __maptype = {
+        "int": "int",
+        "str": "string",
+        "unicode": "string",
+        "float": "float",
+        "bool": "bool",
+    }
+
+    def __init__(self, tag=xconstant.attribute):
+        super(InstanceAttrib, self).__init__(tag)
+        self.type = "string"
+        self.value = ""
+        self.name = ""
+
+    def get_data():
+        return self
+
+    def do_encode_value(self, value):
+        # the test for this encoding and xml is not done TODO.
+        self.value = base64.encodestring(json.dumps(value))
+        self.type = xconstant.encoded
+        return self.value
+
+    def decode_value(self):
+        self.value = json.loads(base64.decodestring(self.value))
+        self.type = xconstant.decoded
+        return self.value
+
+    def set_data_with_type(self, args):
+        try:
+            name = args.pop("name")
+            value = args.pop("value")
+        except Exception as e:
+            raise Exception("FOR NOW: {}".format(e))
+
+        self.name = name
+        if isinstance(value, dict):
+            self.do_encode_value(value)
+        else:
+
+            self.type = self.__maptype[value.__class__.__name__]
+            self.value = str(value)
+
+class FieldsInstance(InstanceAttrib):
+    Property = "fields"
+    def __init__(self, tag=None):
+        if tag is None:
+            tag = xconstant.fields
+        super(FieldsInstance, self).__init__(tag)
+        self.__lookup = dict()
+        self.key = ""
+    
+    def set_key(self, value):
+        self.key = value
+
+class VariantsInstance(InstanceAttrib):
+    Property = "variants"
+    def __init__(self, tag=None):
+        if tag is None:
+            tag = xconstant.variants
+        super(VariantsInstance, self).__init__(tag)
+        self.__lookup = dict()
+
 
 # final gather
-_XGen = {
+_XGenerator = {
     SCH_DEF.Layer_Type_layer.tag : XLayerType,
     SCH_DEF.Stage_Type.tag : XStage,
     SCH_DEF.Stage_Type_asset.tag : XStageAsset,
@@ -274,5 +374,8 @@ _XGen = {
     SCH_DEF.Opinion_shot.tag : XShotOpinion,
     SCH_DEF.Opinion_shot_manifest.tag : XShotOpinionManifest,
     SCH_DEF.Opinion_shot_geom.tag : XShotOpinionGeom,
-    SCH_DEF.Layer_Type_layer_other.tag : XLayerOther
+    SCH_DEF.Layer_Type_layer_other.tag : XLayerOther,
+
+    xconstant.variants : VariantsInstance,
+    xconstant.fields : FieldsInstance
 }
