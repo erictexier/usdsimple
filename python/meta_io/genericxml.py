@@ -12,6 +12,7 @@ class GenericXml(object):
     Property = "GenericXml"
     log = None
     __factory = {}
+    escape_nl = "&#0010;"
 
     def __init__(self, tag=None):
         super(GenericXml, self).__init__()
@@ -123,7 +124,7 @@ class GenericXml(object):
                 value = str(attr[key])
             if key != "":
                 value = XmlIO.do_escape(value)
-                value = value.replace("\n", "&#0010;")
+                value = value.replace("\n", self.escape_nl)
                 value = XmlIO.escape_special_chars(value)
                 element.setAttribute(key, value)
         self.post_to_xml()
@@ -152,7 +153,7 @@ class GenericXml(object):
     def set_attribute_xml(self, element):
         if element.attrib is not None:
             for key in element.attrib:
-                self.__dict__[key] = XmlIO.do_unescape(element.attrib[key]).replace("&#0010;","\n")
+                self.__dict__[key] = XmlIO.do_unescape(element.attrib[key]).replace(self.escape_nl, "\n")
 
     def print_nice(self, max_char=120, tab=""):
         """Print out node on line with the tag name and recursively the children

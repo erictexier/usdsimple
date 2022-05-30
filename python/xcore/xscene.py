@@ -313,6 +313,11 @@ class InstanceAttrib(XScene):
     def get_data():
         return self
 
+    def before_to_xml(self):
+        # this is a method that can be overwriten to check valid and format for xml
+        pass
+
+
     def do_encode_value(self, value):
         # the test for this encoding and xml is not done TODO.
         
