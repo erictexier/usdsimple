@@ -45,6 +45,8 @@ def test_config_read():
             for k in z.get_children():
                 print("\t\t%s" % k.Property)
                 print("\t\t\t%s" % k.get_children())
-                for x in k.get_children():
-                    print(x.decode_value())
-                
+                for kx in k.get_children():
+                    value = kx.decode_value()
+                    print(kx.name, value)
+                    kx.do_encode_value(value)
+    write_config(x,"toto3.xml")
