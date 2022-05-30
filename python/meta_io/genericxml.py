@@ -152,7 +152,7 @@ class GenericXml(object):
     def set_attribute_xml(self, element):
         if element.attrib is not None:
             for key in element.attrib:
-                self.__dict__[key] = XmlIO.do_unescape(element.attrib[key])
+                self.__dict__[key] = XmlIO.do_unescape(element.attrib[key]).replace("&#0010;","\n")
 
     def print_nice(self, max_char=120, tab=""):
         """Print out node on line with the tag name and recursively the children
